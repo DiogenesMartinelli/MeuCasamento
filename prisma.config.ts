@@ -12,5 +12,8 @@ export default defineConfig({
   engine: "classic",
   datasource: {
     url: env("DATABASE_URL"),
+    // Schema-changing CLI commands (db push, migrate) hang against the transaction-mode
+    // pgbouncer pooler on 6543 - route them through the direct/session connection instead.
+    directUrl: env("DIRECT_URL"),
   },
 });
