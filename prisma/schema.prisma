@@ -1,0 +1,155 @@
+// Prisma schema - MeuCasamento (multi-tenant wedding site & admin platform)
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum GuestStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+}
+
+enum GiftType {
+  PHYSICAL_LINK
+  CASH_QUOTA
+}
+
+enum GiftStatus {
+  AVAILABLE
+  PURCHASED
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+/// One row per couple/wedding. Everything else in the system hangs off an Account,
+/// which is how the platform supports multiple weddings (multi-tenant).
+model Account {
+  id          String   @id @default(uuid())
+  /// Public URL slug, e.g. /c/joao-e-maria
+  slug        String   @unique
+  /// Supabase auth.users.id of the couple/admin that owns this account.
+  ownerUserId String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  siteSettings  SiteSettings?
+  events        Event[]
+  guestMessages GuestMessage[]
+
+  @@map("accounts")
+}
+
+model SiteSettings {
+  id                 String   @id @default(uuid())
+  accountId          String   @unique
+  account            Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  coupleName         String   @default("")
+  welcomeMessage     String   @default("")
+  backgroundImageUrl String?
+  bannerImageUrl     String?
+  profileImageUrl    String?
+  updatedAt          DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  accountId   String
+  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name        String
+  date        DateTime
+  description String?
+  createdAt   DateTime @default(now())
+
+  guests Guest[]
+  gifts  Gift[]
+
+  @@index([accountId])
+  @@map("events")
+}
+
+model Guest {
+  id          String      @id @default(uuid())
+  accountId   String
+  name        String
+  /// Shared by every member of the same family unit so one link (/rsvp/[familyToken])
+  /// confirms the whole family at once.
+  familyToken String      @default(uuid())
+  status      GuestStatus @default(PENDING)
+  eventId     String
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  respondedAt DateTime?
+  createdAt   DateTime    @default(now())
+
+  @@index([accountId])
+  @@index([familyToken])
+  @@map("guests")
+}
+
+model Gift {
+  id          String     @id @default(uuid())
+  accountId   String
+  title       String
+  description String?
+  /// Only set when type = CASH_QUOTA.
+  price       Decimal?   @db.Decimal(10, 2)
+  productUrl  String?
+  imageUrl    String?
+  type        GiftType
+  status      GiftStatus @default(AVAILABLE)
+  eventId     String
+  event       Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+
+  payments Payment[]
+
+  @@index([accountId])
+  @@index([eventId])
+  @@map("gifts")
+}
+
+/// Tracks a Mercado Pago checkout attempt for a CASH_QUOTA gift, so the webhook
+/// has something idempotent to update when payment status changes.
+model Payment {
+  id             String        @id @default(uuid())
+  giftId         String
+  gift           Gift          @relation(fields: [giftId], references: [id], onDelete: Cascade)
+  mpPreferenceId String?
+  mpPaymentId    String?       @unique
+  status         PaymentStatus @default(PENDING)
+  amount         Decimal       @db.Decimal(10, 2)
+  payerName      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([giftId])
+  @@map("payments")
+}
+
+model GuestMessage {
+  id         String   @id @default(uuid())
+  accountId  String
+  account    Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  authorName String
+  content    String
+  isVisible  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([accountId])
+  @@map("guest_messages")
+}

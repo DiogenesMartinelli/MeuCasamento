@@ -1,0 +1,98 @@
+import { NextRequest, NextResponse } from "next/server";
+import crypto from "node:crypto";
+import { Payment as MPPayment } from "mercadopago";
+import { prisma } from "@/lib/prisma";
+import { mercadopago } from "@/lib/mercadopago";
+
+type LocalPaymentStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+
+const STATUS_MAP: Record<string, LocalPaymentStatus> = {
+  approved: "APPROVED",
+  pending: "PENDING",
+  in_process: "PENDING",
+  rejected: "REJECTED",
+  cancelled: "CANCELLED",
+  refunded: "CANCELLED",
+  charged_back: "CANCELLED",
+};
+
+function isValidSignature(request: NextRequest, dataId: string) {
+  const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+  if (!secret) return true; // not configured yet - allow through in early dev setup
+
+  const signatureHeader = request.headers.get("x-signature");
+  const requestId = request.headers.get("x-request-id");
+  if (!signatureHeader || !requestId) return false;
+
+  const parts: Record<string, string> = {};
+  for (const part of signatureHeader.split(",")) {
+    const [key, value] = part.split("=");
+    if (key && value) parts[key.trim()] = value.trim();
+  }
+  const { ts, v1 } = parts;
+  if (!ts || !v1) return false;
+
+  const manifest = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
+  const expected = crypto.createHmac("sha256", secret).update(manifest).digest("hex");
+
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(v1, "hex"));
+  } catch {
+    return false;
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const url = new URL(request.url);
+  const queryDataId = url.searchParams.get("data.id") || url.searchParams.get("id");
+  const queryType = url.searchParams.get("type") || url.searchParams.get("topic");
+
+  let body: { type?: string; data?: { id?: string } } | null = null;
+  try {
+    body = await request.json();
+  } catch {
+    // MP sometimes sends notifications with no body, relying on query params only
+  }
+
+  const paymentId = queryDataId || body?.data?.id;
+  const resourceType = queryType || body?.type;
+
+  if (resourceType !== "payment" || !paymentId) {
+    return NextResponse.json({ received: true });
+  }
+
+  if (!isValidSignature(request, String(paymentId))) {
+    return NextResponse.json({ error: "assinatura inválida" }, { status: 401 });
+  }
+
+  const paymentApi = new MPPayment(mercadopago);
+  const mpPayment = await paymentApi.get({ id: paymentId });
+
+  const externalReference = mpPayment.external_reference;
+  if (!externalReference) {
+    return NextResponse.json({ received: true });
+  }
+
+  const paymentRecord = await prisma.payment.findUnique({
+    where: { id: externalReference },
+    include: { gift: true },
+  });
+  if (!paymentRecord) {
+    return NextResponse.json({ received: true });
+  }
+
+  const newStatus = STATUS_MAP[mpPayment.status ?? ""] ?? "PENDING";
+
+  await prisma.$transaction(async (tx) => {
+    await tx.payment.update({
+      where: { id: paymentRecord.id },
+      data: { status: newStatus, mpPaymentId: String(mpPayment.id) },
+    });
+
+    if (newStatus === "APPROVED" && paymentRecord.gift.status !== "PURCHASED") {
+      await tx.gift.update({ where: { id: paymentRecord.giftId }, data: { status: "PURCHASED" } });
+    }
+  });
+
+  return NextResponse.json({ received: true });
+}
