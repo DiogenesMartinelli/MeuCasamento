@@ -51,6 +51,7 @@ export function GiftCard({ gift }: { gift: Gift }) {
           <Button
             disabled={purchased}
             variant={purchased ? "secondary" : "default"}
+            nativeButton={false}
             render={
               <a href={gift.productUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                 {purchased ? "Já presenteado" : "Presentear"}

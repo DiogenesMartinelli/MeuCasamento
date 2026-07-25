@@ -43,6 +43,7 @@ export default async function WeddingSitePage({ params }: PageProps) {
         </p>
         <Button
           className="mt-6"
+          nativeButton={false}
           render={<Link href={`/c/${slug}/presentes`}>Ver lista de presentes</Link>}
         />
       </section>

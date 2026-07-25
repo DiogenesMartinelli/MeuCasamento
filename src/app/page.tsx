@@ -14,8 +14,13 @@ export default function Home() {
         </p>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button size="lg" render={<Link href="/admin/signup">Criar meu site</Link>} />
-        <Button size="lg" variant="outline" render={<Link href="/admin/login">Entrar</Link>} />
+        <Button size="lg" nativeButton={false} render={<Link href="/admin/signup">Criar meu site</Link>} />
+        <Button
+          size="lg"
+          variant="outline"
+          nativeButton={false}
+          render={<Link href="/admin/login">Entrar</Link>}
+        />
       </div>
     </main>
   );
