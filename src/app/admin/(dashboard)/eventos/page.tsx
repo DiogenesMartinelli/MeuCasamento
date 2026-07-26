@@ -44,7 +44,7 @@ export default async function EventsPage() {
               <div className="flex shrink-0 items-center gap-2">
                 <EventDialog event={event} trigger={<Button variant="outline" size="sm">Editar</Button>} />
                 <DeleteButton
-                  action={() => deleteEvent(event.id)}
+                  action={deleteEvent.bind(null, event.id)}
                   confirmMessage={`Excluir o evento "${event.name}"? Convidados e presentes vinculados também serão excluídos.`}
                 />
               </div>

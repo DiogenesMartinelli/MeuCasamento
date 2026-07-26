@@ -18,5 +18,6 @@ export async function getGuestFamilies(accountId: string) {
     familyToken,
     members,
     label: members.map((member) => member.name).join(", "),
+    phone: members.find((member) => member.phone)?.phone ?? null,
   }));
 }

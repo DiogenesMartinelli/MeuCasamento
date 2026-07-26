@@ -9,10 +9,12 @@ export function RsvpActions({
   familyToken,
   slug,
   initialStatus,
+  declineMessage,
 }: {
   familyToken: string;
   slug: string;
   initialStatus: GuestStatus;
+  declineMessage: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<GuestStatus>(initialStatus);
@@ -38,7 +40,7 @@ export function RsvpActions({
         </p>
       )}
       {status === "DECLINED" && (
-        <p className="font-medium text-muted-foreground">Que pena, sentiremos sua falta 💔</p>
+        <p className="font-medium text-muted-foreground">{declineMessage}</p>
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}
 

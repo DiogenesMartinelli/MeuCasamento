@@ -39,6 +39,10 @@ export default async function RsvpPage({ params }: PageProps) {
         familyToken={familyToken}
         slug={slug}
         initialStatus={familyGuests[0].status}
+        declineMessage={
+          account.siteSettings?.declineMessage ||
+          "Que pena! Sentiremos sua falta, mas agradecemos por avisar. 💛"
+        }
       />
     </main>
   );

@@ -37,6 +37,22 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
         <TemplatePicker defaultValue={settings?.template ?? "CLASSIC"} />
       </div>
 
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="declineMessage">Mensagem para quem não puder ir</Label>
+        <Textarea
+          id="declineMessage"
+          name="declineMessage"
+          rows={2}
+          defaultValue={
+            settings?.declineMessage ??
+            "Que pena! Sentiremos sua falta, mas agradecemos por avisar. 💛"
+          }
+        />
+        <p className="text-xs text-muted-foreground">
+          Aparece para o convidado quando ele confirma que não poderá comparecer.
+        </p>
+      </div>
+
       <ImageField
         name="backgroundImage"
         label="Imagem de fundo (hero)"

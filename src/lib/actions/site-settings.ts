@@ -16,6 +16,7 @@ const textSchema = z.object({
   coupleName: z.string().trim().min(1, "Informe o nome do casal").max(120),
   welcomeMessage: z.string().trim().max(500),
   template: z.enum(templateIds),
+  declineMessage: z.string().trim().min(1, "Escreva a mensagem de recusa").max(500),
 });
 
 async function uploadIfPresent(file: FormDataEntryValue | null, accountId: string, field: string) {
@@ -36,6 +37,7 @@ export async function updateSiteSettings(
     coupleName: formData.get("coupleName"),
     welcomeMessage: formData.get("welcomeMessage"),
     template: formData.get("template"),
+    declineMessage: formData.get("declineMessage"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
@@ -55,6 +57,7 @@ export async function updateSiteSettings(
         coupleName: parsed.data.coupleName,
         welcomeMessage: parsed.data.welcomeMessage,
         template: parsed.data.template,
+        declineMessage: parsed.data.declineMessage,
         backgroundImageUrl,
         bannerImageUrl,
         profileImageUrl,
@@ -63,6 +66,7 @@ export async function updateSiteSettings(
         coupleName: parsed.data.coupleName,
         welcomeMessage: parsed.data.welcomeMessage,
         template: parsed.data.template,
+        declineMessage: parsed.data.declineMessage,
         ...(backgroundImageUrl ? { backgroundImageUrl } : {}),
         ...(bannerImageUrl ? { bannerImageUrl } : {}),
         ...(profileImageUrl ? { profileImageUrl } : {}),

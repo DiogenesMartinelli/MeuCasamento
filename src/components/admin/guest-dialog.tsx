@@ -82,6 +82,21 @@ export function GuestDialog({
           </div>
 
           <div className="flex flex-col gap-1.5">
+            <Label htmlFor="phone">WhatsApp (opcional)</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="(11) 91234-5678"
+              defaultValue={guest?.phone ?? ""}
+            />
+            <p className="text-xs text-muted-foreground">
+              Preencha em pelo menos um membro da família para poder enviar o convite por
+              WhatsApp.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
             <Label>Evento</Label>
             <Select value={eventId} onValueChange={(value) => setEventId(value ?? "")}>
               <SelectTrigger>

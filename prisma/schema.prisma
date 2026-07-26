@@ -75,6 +75,8 @@ model SiteSettings {
   bannerImageUrl     String?
   profileImageUrl    String?
   template           SiteTemplate @default(CLASSIC)
+  /// Shown to a guest after they choose "não poderei comparecer" on the RSVP page.
+  declineMessage     String       @default("Que pena! Sentiremos sua falta, mas agradecemos por avisar. 💛")
   updatedAt          DateTime     @updatedAt
 
   @@map("site_settings")
@@ -100,6 +102,9 @@ model Guest {
   id          String      @id @default(uuid())
   accountId   String
   name        String
+  /// WhatsApp-reachable phone number for the family, used to send the RSVP link/QR code.
+  /// Only needs to be set on one member of a family for the "send" actions to work.
+  phone       String?
   /// Shared by every member of the same family unit so one link (/rsvp/[familyToken])
   /// confirms the whole family at once.
   familyToken String      @default(uuid())

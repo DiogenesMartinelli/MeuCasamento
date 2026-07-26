@@ -8,16 +8,25 @@ import { requireCurrentAccount } from "@/lib/current-account";
 
 export type GuestFormState = { error?: string };
 
+const phoneSchema = z
+  .string()
+  .trim()
+  .max(30)
+  .optional()
+  .transform((v) => (v ? v : undefined));
+
 const createSchema = z.object({
   name: z.string().trim().min(1, "Informe o nome do convidado").max(120),
   eventId: z.string().min(1, "Selecione um evento"),
   familyToken: z.string().min(1),
+  phone: phoneSchema,
 });
 
 const updateSchema = z.object({
   name: z.string().trim().min(1, "Informe o nome do convidado").max(120),
   eventId: z.string().min(1, "Selecione um evento"),
   status: z.enum(["PENDING", "CONFIRMED", "DECLINED"]),
+  phone: phoneSchema,
 });
 
 export async function createGuest(formData: FormData): Promise<GuestFormState> {
@@ -27,6 +36,7 @@ export async function createGuest(formData: FormData): Promise<GuestFormState> {
     name: formData.get("name"),
     eventId: formData.get("eventId"),
     familyToken: formData.get("familyToken"),
+    phone: formData.get("phone"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
@@ -49,6 +59,7 @@ export async function createGuest(formData: FormData): Promise<GuestFormState> {
       name: parsed.data.name,
       eventId: parsed.data.eventId,
       familyToken,
+      phone: parsed.data.phone,
     },
   });
 
@@ -66,6 +77,7 @@ export async function updateGuest(guestId: string, formData: FormData): Promise<
     name: formData.get("name"),
     eventId: formData.get("eventId"),
     status: formData.get("status"),
+    phone: formData.get("phone"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
@@ -78,6 +90,7 @@ export async function updateGuest(guestId: string, formData: FormData): Promise<
       name: parsed.data.name,
       eventId: parsed.data.eventId,
       status: parsed.data.status,
+      phone: parsed.data.phone ?? null,
       respondedAt: parsed.data.status === "PENDING" ? null : new Date(),
     },
   });

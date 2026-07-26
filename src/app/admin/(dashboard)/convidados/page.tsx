@@ -2,25 +2,9 @@ import Link from "next/link";
 import { getCurrentAccount } from "@/lib/current-account";
 import { prisma } from "@/lib/prisma";
 import { getGuestFamilies } from "@/lib/queries/guest-families";
-import { deleteGuest } from "@/lib/actions/guests";
 import { GuestDialog } from "@/components/admin/guest-dialog";
-import { DeleteButton } from "@/components/admin/delete-button";
-import { CopyLinkButton } from "@/components/admin/copy-link-button";
+import { GuestFamiliesList } from "@/components/admin/guest-families-list";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import type { GuestStatus } from "@/generated/prisma/client";
-
-const STATUS_VARIANT: Record<GuestStatus, "default" | "secondary" | "outline"> = {
-  CONFIRMED: "default",
-  DECLINED: "outline",
-  PENDING: "secondary",
-};
-const STATUS_LABEL: Record<GuestStatus, string> = {
-  CONFIRMED: "Confirmado",
-  DECLINED: "Recusado",
-  PENDING: "Pendente",
-};
 
 export default async function GuestsPage() {
   const account = await getCurrentAccount();
@@ -55,64 +39,16 @@ export default async function GuestsPage() {
           </Link>{" "}
           antes de adicionar convidados.
         </p>
-      ) : families.length === 0 ? (
-        <p className="mt-8 text-sm text-muted-foreground">Nenhum convidado cadastrado ainda.</p>
       ) : (
-        <div className="mt-8 flex flex-col gap-4">
-          {families.map((family) => (
-            <Card key={family.familyToken}>
-              <CardContent className="py-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-muted-foreground">{family.label}</p>
-                  <div className="flex items-center gap-2">
-                    <CopyLinkButton
-                      url={`${appUrl}/c/${account!.slug}/rsvp/${family.familyToken}`}
-                    />
-                    <GuestDialog
-                      events={events}
-                      families={familyOptions}
-                      defaultFamilyToken={family.familyToken}
-                      trigger={
-                        <Button variant="outline" size="sm">
-                          + Membro
-                        </Button>
-                      }
-                    />
-                  </div>
-                </div>
-                <ul className="mt-3 divide-y">
-                  {family.members.map((guest) => (
-                    <li key={guest.id} className="flex items-center justify-between gap-3 py-2">
-                      <div>
-                        <p className="font-medium">{guest.name}</p>
-                        <p className="text-xs text-muted-foreground">{guest.event.name}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={STATUS_VARIANT[guest.status]}>
-                          {STATUS_LABEL[guest.status]}
-                        </Badge>
-                        <GuestDialog
-                          events={events}
-                          families={familyOptions}
-                          guest={guest}
-                          trigger={
-                            <Button variant="ghost" size="sm">
-                              Editar
-                            </Button>
-                          }
-                        />
-                        <DeleteButton
-                          action={() => deleteGuest(guest.id)}
-                          confirmMessage={`Remover ${guest.name}?`}
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <GuestFamiliesList
+          families={families}
+          events={events}
+          familyOptions={familyOptions}
+          appUrl={appUrl}
+          slug={account!.slug}
+          coupleName={account?.siteSettings?.coupleName || "Nós"}
+          photoUrl={account?.siteSettings?.profileImageUrl}
+        />
       )}
     </div>
   );

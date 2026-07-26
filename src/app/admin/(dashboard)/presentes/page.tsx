@@ -78,7 +78,7 @@ export default async function GiftsAdminPage() {
                   />
                   <GiftStatusToggle giftId={gift.id} status={gift.status} />
                   <DeleteButton
-                    action={() => deleteGift(gift.id)}
+                    action={deleteGift.bind(null, gift.id)}
                     confirmMessage={`Excluir o presente "${gift.title}"?`}
                   />
                 </div>
