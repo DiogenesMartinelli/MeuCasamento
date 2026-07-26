@@ -39,13 +39,38 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
         <TemplatePicker defaultValue={settings?.template ?? "CLASSIC"} />
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label>Cor de destaque (opcional)</Label>
-        <ColorPickerField defaultValue={settings?.accentColor} />
-        <p className="text-xs text-muted-foreground">
-          Sobrescreve a cor dos botões principais em cima do estilo escolhido acima.
-        </p>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="flex flex-col gap-1.5">
+          <Label>Cor de destaque</Label>
+          <ColorPickerField
+            name="accentColor"
+            ariaLabel="Escolher cor de destaque"
+            defaultValue={settings?.accentColor}
+          />
+          <p className="text-xs text-muted-foreground">Cor dos botões principais.</p>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label>Cor de fundo</Label>
+          <ColorPickerField
+            name="backgroundColor"
+            ariaLabel="Escolher cor de fundo"
+            defaultValue={settings?.backgroundColor}
+          />
+          <p className="text-xs text-muted-foreground">Fundo das seções do site.</p>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label>Cor do texto</Label>
+          <ColorPickerField
+            name="textColor"
+            ariaLabel="Escolher cor do texto"
+            defaultValue={settings?.textColor}
+          />
+          <p className="text-xs text-muted-foreground">Cor dos títulos e textos.</p>
+        </div>
       </div>
+      <p className="-mt-4 text-xs text-muted-foreground">
+        Todas opcionais: o que não for definido usa a cor padrão do estilo escolhido acima.
+      </p>
 
       <div className="flex flex-col gap-1.5">
         <Label>Formato dos cards de presente</Label>

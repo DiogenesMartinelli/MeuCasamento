@@ -4,7 +4,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function ColorPickerField({ defaultValue }: { defaultValue?: string | null }) {
+export function ColorPickerField({
+  name,
+  defaultValue,
+  ariaLabel,
+}: {
+  name: string;
+  defaultValue?: string | null;
+  ariaLabel?: string;
+}) {
   const [color, setColor] = useState(defaultValue ?? "");
 
   return (
@@ -14,10 +22,10 @@ export function ColorPickerField({ defaultValue }: { defaultValue?: string | nul
         value={color || "#000000"}
         onChange={(e) => setColor(e.target.value)}
         className="h-9 w-12 cursor-pointer rounded-md border border-input bg-transparent p-1"
-        aria-label="Escolher cor de destaque"
+        aria-label={ariaLabel ?? "Escolher cor"}
       />
       <Input
-        name="accentColor"
+        name={name}
         value={color}
         onChange={(e) => setColor(e.target.value)}
         placeholder="Usar cor padrão do estilo"

@@ -9,7 +9,7 @@ import { EventsBanner } from "@/components/public/events-banner";
 import { GuestMessageForm } from "@/components/public/guest-message-form";
 import { GuestMessageWall } from "@/components/public/guest-message-wall";
 import { Button } from "@/components/ui/button";
-import { getAccentButtonStyle } from "@/lib/accent-color";
+import { getAccentButtonStyle, getSectionStyle, getTextStyle } from "@/lib/accent-color";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -40,10 +40,15 @@ export default async function WeddingSitePage({ params }: PageProps) {
 
       <EventsBanner events={account.events} bannerImageUrl={settings?.bannerImageUrl} template={template} />
 
-      <section className={`px-6 py-16 text-center ${template.sectionBg}`}>
+      <section
+        className={`px-6 py-16 text-center ${template.sectionBg}`}
+        style={getSectionStyle(settings?.backgroundColor, settings?.textColor)}
+      >
         <div className="mx-auto max-w-3xl">
-          <h2 className={`text-3xl font-semibold ${template.headingFont}`}>Lista de Presentes</h2>
-          <p className="mt-3 text-muted-foreground">
+          <h2 className={`text-3xl font-semibold ${template.headingFont}`} style={getTextStyle(settings?.textColor)}>
+            Lista de Presentes
+          </h2>
+          <p className="mt-3 opacity-80">
             Sua presença já é o maior presente, mas se quiser nos ajudar a começar essa nova fase...
           </p>
           <Button
@@ -55,8 +60,12 @@ export default async function WeddingSitePage({ params }: PageProps) {
         </div>
       </section>
 
-      <section id="mural" className="mx-auto max-w-5xl px-6 py-16">
-        <h2 className={`text-center text-3xl font-semibold ${template.headingFont}`}>
+      <section
+        id="mural"
+        className="mx-auto max-w-5xl px-6 py-16"
+        style={getSectionStyle(undefined, settings?.textColor)}
+      >
+        <h2 className={`text-center text-3xl font-semibold ${template.headingFont}`} style={getTextStyle(settings?.textColor)}>
           Mural de Recados
         </h2>
         <div className="mx-auto mt-8 max-w-xl">

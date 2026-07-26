@@ -4,6 +4,7 @@ import { getGuestFamily } from "@/lib/queries/guests";
 import { getGiftsForAccount } from "@/lib/queries/gifts";
 import { getSiteTemplate } from "@/lib/site-templates";
 import { RsvpFlow } from "@/components/public/rsvp-flow";
+import { getSectionStyle } from "@/lib/accent-color";
 
 type PageProps = { params: Promise<{ slug: string; familyToken: string }> };
 
@@ -22,6 +23,7 @@ export default async function RsvpPage({ params }: PageProps) {
   return (
     <main
       className={`mx-auto flex min-h-screen w-full flex-col items-center justify-center gap-8 px-6 py-16 ${template.sectionBg}`}
+      style={getSectionStyle(account.siteSettings?.backgroundColor, account.siteSettings?.textColor)}
     >
       <RsvpFlow
         familyToken={familyToken}
@@ -39,6 +41,7 @@ export default async function RsvpPage({ params }: PageProps) {
         cardClass={template.cardClass}
         accentColor={account.siteSettings?.accentColor}
         giftCardShape={account.siteSettings?.giftCardShape}
+        textColor={account.siteSettings?.textColor}
       />
     </main>
   );

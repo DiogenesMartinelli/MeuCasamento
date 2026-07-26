@@ -4,6 +4,7 @@ import { getAccountBySlug } from "@/lib/queries/account";
 import { getGiftsForAccount } from "@/lib/queries/gifts";
 import { getSiteTemplate } from "@/lib/site-templates";
 import { GiftsList } from "@/components/public/gifts-list";
+import { getSectionStyle, getTextStyle } from "@/lib/accent-color";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -22,12 +23,18 @@ export default async function GiftsPage({ params }: PageProps) {
   const template = getSiteTemplate(account.siteSettings?.template);
 
   return (
-    <main className={`px-6 py-16 ${template.sectionBg}`}>
+    <main
+      className={`px-6 py-16 ${template.sectionBg}`}
+      style={getSectionStyle(account.siteSettings?.backgroundColor, account.siteSettings?.textColor)}
+    >
       <div className="mx-auto max-w-6xl">
-        <h1 className={`text-center text-3xl font-semibold ${template.headingFont}`}>
+        <h1
+          className={`text-center text-3xl font-semibold ${template.headingFont}`}
+          style={getTextStyle(account.siteSettings?.textColor)}
+        >
           Lista de Presentes
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-center text-muted-foreground">
+        <p className="mx-auto mt-3 max-w-xl text-center opacity-80">
           Escolha um presente físico ou contribua com uma cota para{" "}
           {account.siteSettings?.coupleName || "os noivos"}.
         </p>

@@ -28,6 +28,8 @@ const textSchema = z.object({
   template: z.enum(templateIds),
   declineMessage: z.string().trim().min(1, "Escreva a mensagem de recusa").max(500),
   accentColor: hexColor,
+  backgroundColor: hexColor,
+  textColor: hexColor,
   giftCardShape: z.enum(shapeIds),
 });
 
@@ -51,6 +53,8 @@ export async function updateSiteSettings(
     template: formData.get("template"),
     declineMessage: formData.get("declineMessage"),
     accentColor: formData.get("accentColor"),
+    backgroundColor: formData.get("backgroundColor"),
+    textColor: formData.get("textColor"),
     giftCardShape: formData.get("giftCardShape"),
   });
   if (!parsed.success) {
@@ -73,6 +77,8 @@ export async function updateSiteSettings(
         template: parsed.data.template,
         declineMessage: parsed.data.declineMessage,
         accentColor: parsed.data.accentColor ?? null,
+        backgroundColor: parsed.data.backgroundColor ?? null,
+        textColor: parsed.data.textColor ?? null,
         giftCardShape: parsed.data.giftCardShape,
         backgroundImageUrl,
         bannerImageUrl,
@@ -84,6 +90,8 @@ export async function updateSiteSettings(
         template: parsed.data.template,
         declineMessage: parsed.data.declineMessage,
         accentColor: parsed.data.accentColor ?? null,
+        backgroundColor: parsed.data.backgroundColor ?? null,
+        textColor: parsed.data.textColor ?? null,
         giftCardShape: parsed.data.giftCardShape,
         ...(backgroundImageUrl ? { backgroundImageUrl } : {}),
         ...(bannerImageUrl ? { bannerImageUrl } : {}),

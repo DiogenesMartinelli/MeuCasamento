@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { respondRsvp } from "@/lib/actions/rsvp";
 import { Button } from "@/components/ui/button";
 import { GiftsList } from "@/components/public/gifts-list";
-import { getAccentButtonStyle } from "@/lib/accent-color";
+import { getAccentButtonStyle, getTextStyle } from "@/lib/accent-color";
 import type { SerializedGift } from "@/lib/queries/gifts";
 import type { Event, GiftCardShape, GuestStatus } from "@/generated/prisma/client";
 
@@ -25,6 +25,7 @@ export function RsvpFlow({
   cardClass,
   accentColor,
   giftCardShape,
+  textColor,
 }: {
   familyToken: string;
   slug: string;
@@ -38,6 +39,7 @@ export function RsvpFlow({
   cardClass: string;
   accentColor?: string | null;
   giftCardShape?: GiftCardShape;
+  textColor?: string | null;
 }) {
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<GuestStatus>(initialStatus);
@@ -61,7 +63,10 @@ export function RsvpFlow({
   if (step === "gifts") {
     return (
       <div className="w-full max-w-6xl">
-        <h1 className={`mb-6 text-center text-3xl font-semibold ${headingFont}`}>
+        <h1
+          className={`mb-6 text-center text-3xl font-semibold ${headingFont}`}
+          style={getTextStyle(textColor)}
+        >
           Lista de Presentes
         </h1>
         <GiftsList gifts={gifts} events={events} accentColor={accentColor} shape={giftCardShape} />
@@ -75,7 +80,7 @@ export function RsvpFlow({
         <>
           <div>
             <h1 className={`text-3xl font-semibold ${headingFont}`}>Confirme sua presença</h1>
-            <p className="mt-2 text-muted-foreground">{coupleName}</p>
+            <p className="mt-2 opacity-80">{coupleName}</p>
           </div>
 
           <ul className={`w-full divide-y rounded-lg border ${cardClass}`}>
@@ -106,9 +111,7 @@ export function RsvpFlow({
               Presença confirmada! Vemos vocês lá 🎉
             </p>
           )}
-          {status === "DECLINED" && (
-            <p className="font-medium text-muted-foreground">{declineMessage}</p>
-          )}
+          {status === "DECLINED" && <p className="font-medium opacity-80">{declineMessage}</p>}
           <Button style={accentStyle} onClick={() => setStep("ask-gift")}>
             Continuar
           </Button>
@@ -129,9 +132,7 @@ export function RsvpFlow({
         </div>
       )}
 
-      {step === "done" && (
-        <p className="font-medium text-muted-foreground">Combinado! Até breve 💛</p>
-      )}
+      {step === "done" && <p className="font-medium opacity-80">Combinado! Até breve 💛</p>}
     </div>
   );
 }

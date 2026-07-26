@@ -22,14 +22,36 @@ export function getAccentButtonStyle(accentColor?: string | null): CSSProperties
   };
 }
 
+/** Inline style overriding a section's background (and readable text color), if set. */
+export function getSectionStyle(
+  backgroundColor?: string | null,
+  textColor?: string | null,
+): CSSProperties | undefined {
+  if (!backgroundColor && !textColor) return undefined;
+  return {
+    ...(backgroundColor ? { backgroundColor } : {}),
+    ...(textColor ? { color: textColor } : { color: backgroundColor ? pickTextColor(backgroundColor) : undefined }),
+  };
+}
+
+/** Inline style overriding text/heading color, if set. */
+export function getTextStyle(textColor?: string | null): CSSProperties | undefined {
+  if (!textColor) return undefined;
+  return { color: textColor };
+}
+
 export const GIFT_CARD_SHAPE_CLASS: Record<GiftCardShape, { image: string; button: string }> = {
   SQUARE: { image: "rounded-none", button: "rounded-none" },
   ROUNDED: { image: "rounded-lg", button: "rounded-md" },
+  SOFT: { image: "rounded-2xl", button: "rounded-xl" },
   PILL: { image: "rounded-3xl", button: "rounded-full" },
+  OVAL: { image: "rounded-[50%]", button: "rounded-full" },
 };
 
 export const GIFT_CARD_SHAPE_OPTIONS: { id: GiftCardShape; label: string }[] = [
   { id: "SQUARE", label: "Quadrado" },
   { id: "ROUNDED", label: "Arredondado" },
+  { id: "SOFT", label: "Suave" },
   { id: "PILL", label: "Redondo" },
+  { id: "OVAL", label: "Oval" },
 ];

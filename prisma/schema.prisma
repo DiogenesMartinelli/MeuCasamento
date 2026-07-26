@@ -50,7 +50,9 @@ enum SiteTemplate {
 enum GiftCardShape {
   SQUARE
   ROUNDED
+  SOFT
   PILL
+  OVAL
 }
 
 /// One row per couple/wedding. Everything else in the system hangs off an Account,
@@ -83,8 +85,11 @@ model SiteSettings {
   template           SiteTemplate  @default(CLASSIC)
   /// Shown to a guest after they choose "não poderei comparecer" on the RSVP page.
   declineMessage     String        @default("Que pena! Sentiremos sua falta, mas agradecemos por avisar. 💛")
-  /// Optional hex color (e.g. "#e11d48") overriding the template's accent/button color.
+  /// Optional hex colors overriding the template's defaults. Any left unset falls
+  /// back to the chosen template's own palette.
   accentColor        String?
+  backgroundColor    String?
+  textColor          String?
   giftCardShape      GiftCardShape @default(ROUNDED)
   updatedAt          DateTime      @updatedAt
 

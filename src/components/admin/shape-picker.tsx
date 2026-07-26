@@ -1,15 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { GIFT_CARD_SHAPE_OPTIONS } from "@/lib/accent-color";
+import { GIFT_CARD_SHAPE_OPTIONS, GIFT_CARD_SHAPE_CLASS } from "@/lib/accent-color";
 import { cn } from "@/lib/utils";
 import type { GiftCardShape } from "@/generated/prisma/client";
-
-const PREVIEW_CLASS: Record<GiftCardShape, string> = {
-  SQUARE: "rounded-none",
-  ROUNDED: "rounded-lg",
-  PILL: "rounded-full",
-};
 
 export function ShapePicker({ defaultValue }: { defaultValue: GiftCardShape }) {
   const [selected, setSelected] = useState<GiftCardShape>(defaultValue);
@@ -31,7 +25,7 @@ export function ShapePicker({ defaultValue }: { defaultValue: GiftCardShape }) {
               )}
             >
               <span
-                className={cn("h-8 w-14 bg-foreground/70", PREVIEW_CLASS[option.id])}
+                className={cn("h-8 w-14 bg-foreground/70", GIFT_CARD_SHAPE_CLASS[option.id].image)}
                 aria-hidden
               />
               <span className="text-xs">{option.label}</span>
