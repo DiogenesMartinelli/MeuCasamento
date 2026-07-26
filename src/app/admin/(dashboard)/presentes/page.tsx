@@ -18,11 +18,12 @@ export default async function GiftsAdminPage() {
     where: { accountId: account!.id },
     orderBy: { date: "asc" },
   });
-  const gifts = await prisma.gift.findMany({
+  const rawGifts = await prisma.gift.findMany({
     where: { accountId: account!.id },
     include: { event: true },
     orderBy: { createdAt: "desc" },
   });
+  const gifts = rawGifts.map((gift) => ({ ...gift, price: gift.price === null ? null : Number(gift.price) }));
 
   return (
     <div>

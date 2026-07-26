@@ -4,7 +4,8 @@ import { getAccountBySlug } from "@/lib/queries/account";
 import { getGiftsForAccount } from "@/lib/queries/gifts";
 import { getSiteTemplate } from "@/lib/site-templates";
 import { GiftsList } from "@/components/public/gifts-list";
-import { getSectionStyle, getTextStyle } from "@/lib/accent-color";
+import { getSectionStyle, getTextStyle, getMutedTextStyle } from "@/lib/accent-color";
+import type { SiteColors } from "@/lib/accent-color";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -21,6 +22,14 @@ export default async function GiftsPage({ params }: PageProps) {
 
   const gifts = await getGiftsForAccount(account.id);
   const template = getSiteTemplate(account.siteSettings?.template);
+  const colors: SiteColors = {
+    accentColor: account.siteSettings?.accentColor,
+    backgroundColor: account.siteSettings?.backgroundColor,
+    textColor: account.siteSettings?.textColor,
+    mutedTextColor: account.siteSettings?.mutedTextColor,
+    cardBackgroundColor: account.siteSettings?.cardBackgroundColor,
+    borderColor: account.siteSettings?.borderColor,
+  };
 
   return (
     <main
@@ -34,17 +43,15 @@ export default async function GiftsPage({ params }: PageProps) {
         >
           Lista de Presentes
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-center opacity-80">
+        <p
+          className="mx-auto mt-3 max-w-xl text-center opacity-80"
+          style={getMutedTextStyle(account.siteSettings?.mutedTextColor)}
+        >
           Escolha um presente físico ou contribua com uma cota para{" "}
           {account.siteSettings?.coupleName || "os noivos"}.
         </p>
         <div className="mt-10">
-          <GiftsList
-            gifts={gifts}
-            events={account.events}
-            accentColor={account.siteSettings?.accentColor}
-            shape={account.siteSettings?.giftCardShape}
-          />
+          <GiftsList gifts={gifts} events={account.events} colors={colors} shape={account.siteSettings?.giftCardShape} />
         </div>
       </div>
     </main>

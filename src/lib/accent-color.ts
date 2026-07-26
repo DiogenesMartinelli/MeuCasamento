@@ -1,6 +1,16 @@
 import type { CSSProperties } from "react";
 import type { GiftCardShape } from "@/generated/prisma/client";
 
+/** The couple's optional custom color palette, as stored on SiteSettings. */
+export type SiteColors = {
+  accentColor?: string | null;
+  backgroundColor?: string | null;
+  textColor?: string | null;
+  mutedTextColor?: string | null;
+  cardBackgroundColor?: string | null;
+  borderColor?: string | null;
+};
+
 /** Picks readable text color (black/white) for a given hex background. */
 function pickTextColor(hex: string): string {
   const clean = hex.replace("#", "");
@@ -38,6 +48,24 @@ export function getSectionStyle(
 export function getTextStyle(textColor?: string | null): CSSProperties | undefined {
   if (!textColor) return undefined;
   return { color: textColor };
+}
+
+/** Inline style overriding secondary/muted text color, if set. */
+export function getMutedTextStyle(mutedTextColor?: string | null): CSSProperties | undefined {
+  if (!mutedTextColor) return undefined;
+  return { color: mutedTextColor };
+}
+
+/** Inline style overriding a card/surface's background and border color, if set. */
+export function getCardStyle(
+  cardBackgroundColor?: string | null,
+  borderColor?: string | null,
+): CSSProperties | undefined {
+  if (!cardBackgroundColor && !borderColor) return undefined;
+  return {
+    ...(cardBackgroundColor ? { backgroundColor: cardBackgroundColor } : {}),
+    ...(borderColor ? { borderColor } : {}),
+  };
 }
 
 export const GIFT_CARD_SHAPE_CLASS: Record<GiftCardShape, { image: string; button: string }> = {

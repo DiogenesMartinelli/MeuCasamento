@@ -9,7 +9,8 @@ import { EventsBanner } from "@/components/public/events-banner";
 import { GuestMessageForm } from "@/components/public/guest-message-form";
 import { GuestMessageWall } from "@/components/public/guest-message-wall";
 import { Button } from "@/components/ui/button";
-import { getAccentButtonStyle, getSectionStyle, getTextStyle } from "@/lib/accent-color";
+import { getAccentButtonStyle, getSectionStyle, getTextStyle, getMutedTextStyle } from "@/lib/accent-color";
+import type { SiteColors } from "@/lib/accent-color";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -27,6 +28,14 @@ export default async function WeddingSitePage({ params }: PageProps) {
   const [messages] = await Promise.all([getVisibleMessages(account.id)]);
   const settings = account.siteSettings;
   const template = getSiteTemplate(settings?.template);
+  const colors: SiteColors = {
+    accentColor: settings?.accentColor,
+    backgroundColor: settings?.backgroundColor,
+    textColor: settings?.textColor,
+    mutedTextColor: settings?.mutedTextColor,
+    cardBackgroundColor: settings?.cardBackgroundColor,
+    borderColor: settings?.borderColor,
+  };
 
   return (
     <main>
@@ -38,7 +47,12 @@ export default async function WeddingSitePage({ params }: PageProps) {
         template={template}
       />
 
-      <EventsBanner events={account.events} bannerImageUrl={settings?.bannerImageUrl} template={template} />
+      <EventsBanner
+        events={account.events}
+        bannerImageUrl={settings?.bannerImageUrl}
+        template={template}
+        colors={colors}
+      />
 
       <section
         className={`px-6 py-16 text-center ${template.sectionBg}`}
@@ -48,7 +62,7 @@ export default async function WeddingSitePage({ params }: PageProps) {
           <h2 className={`text-3xl font-semibold ${template.headingFont}`} style={getTextStyle(settings?.textColor)}>
             Lista de Presentes
           </h2>
-          <p className="mt-3 opacity-80">
+          <p className="mt-3 opacity-80" style={getMutedTextStyle(settings?.mutedTextColor)}>
             Sua presença já é o maior presente, mas se quiser nos ajudar a começar essa nova fase...
           </p>
           <Button
@@ -72,7 +86,7 @@ export default async function WeddingSitePage({ params }: PageProps) {
           <GuestMessageForm accountId={account.id} slug={slug} />
         </div>
         <div className="mt-12">
-          <GuestMessageWall messages={messages} template={template} />
+          <GuestMessageWall messages={messages} template={template} colors={colors} />
         </div>
       </section>
     </main>

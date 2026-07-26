@@ -3,18 +3,20 @@
 import { useMemo, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GiftCard } from "./gift-card";
+import { getMutedTextStyle } from "@/lib/accent-color";
+import type { SiteColors } from "@/lib/accent-color";
 import type { SerializedGift } from "@/lib/queries/gifts";
 import type { Event, GiftCardShape } from "@/generated/prisma/client";
 
 export function GiftsList({
   gifts,
   events,
-  accentColor,
+  colors,
   shape,
 }: {
   gifts: SerializedGift[];
   events: Event[];
-  accentColor?: string | null;
+  colors?: SiteColors;
   shape?: GiftCardShape;
 }) {
   const [eventId, setEventId] = useState<string>("all");
@@ -40,11 +42,13 @@ export function GiftsList({
       )}
 
       {filtered.length === 0 ? (
-        <p className="text-center text-muted-foreground">Nenhum presente cadastrado ainda.</p>
+        <p className="text-center text-muted-foreground" style={getMutedTextStyle(colors?.mutedTextColor)}>
+          Nenhum presente cadastrado ainda.
+        </p>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((gift) => (
-            <GiftCard key={gift.id} gift={gift} accentColor={accentColor} shape={shape} />
+            <GiftCard key={gift.id} gift={gift} colors={colors} shape={shape} />
           ))}
         </div>
       )}

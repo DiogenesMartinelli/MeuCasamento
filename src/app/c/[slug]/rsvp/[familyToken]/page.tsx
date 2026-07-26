@@ -5,6 +5,7 @@ import { getGiftsForAccount } from "@/lib/queries/gifts";
 import { getSiteTemplate } from "@/lib/site-templates";
 import { RsvpFlow } from "@/components/public/rsvp-flow";
 import { getSectionStyle } from "@/lib/accent-color";
+import type { SiteColors } from "@/lib/accent-color";
 
 type PageProps = { params: Promise<{ slug: string; familyToken: string }> };
 
@@ -19,6 +20,14 @@ export default async function RsvpPage({ params }: PageProps) {
 
   const gifts = await getGiftsForAccount(account.id);
   const template = getSiteTemplate(account.siteSettings?.template);
+  const colors: SiteColors = {
+    accentColor: account.siteSettings?.accentColor,
+    backgroundColor: account.siteSettings?.backgroundColor,
+    textColor: account.siteSettings?.textColor,
+    mutedTextColor: account.siteSettings?.mutedTextColor,
+    cardBackgroundColor: account.siteSettings?.cardBackgroundColor,
+    borderColor: account.siteSettings?.borderColor,
+  };
 
   return (
     <main
@@ -39,9 +48,9 @@ export default async function RsvpPage({ params }: PageProps) {
         events={account.events}
         headingFont={template.headingFont}
         cardClass={template.cardClass}
-        accentColor={account.siteSettings?.accentColor}
         giftCardShape={account.siteSettings?.giftCardShape}
-        textColor={account.siteSettings?.textColor}
+        colors={colors}
+        askGiftIntent={account.siteSettings?.askGiftIntent ?? true}
       />
     </main>
   );

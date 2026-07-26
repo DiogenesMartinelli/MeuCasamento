@@ -23,13 +23,15 @@ import {
 } from "@/components/ui/dialog";
 import type { Event, Gift, GiftType } from "@/generated/prisma/client";
 
+type SerializedGift = Omit<Gift, "price"> & { price: number | null };
+
 export function GiftDialog({
   events,
   gift,
   trigger,
 }: {
   events: Event[];
-  gift?: Gift;
+  gift?: SerializedGift;
   trigger: React.ReactElement;
 }) {
   const [open, setOpen] = useState(false);

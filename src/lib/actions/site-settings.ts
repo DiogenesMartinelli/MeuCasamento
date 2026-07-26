@@ -30,7 +30,11 @@ const textSchema = z.object({
   accentColor: hexColor,
   backgroundColor: hexColor,
   textColor: hexColor,
+  mutedTextColor: hexColor,
+  cardBackgroundColor: hexColor,
+  borderColor: hexColor,
   giftCardShape: z.enum(shapeIds),
+  askGiftIntent: z.boolean(),
 });
 
 async function uploadIfPresent(file: FormDataEntryValue | null, accountId: string, field: string) {
@@ -55,7 +59,11 @@ export async function updateSiteSettings(
     accentColor: formData.get("accentColor"),
     backgroundColor: formData.get("backgroundColor"),
     textColor: formData.get("textColor"),
+    mutedTextColor: formData.get("mutedTextColor"),
+    cardBackgroundColor: formData.get("cardBackgroundColor"),
+    borderColor: formData.get("borderColor"),
     giftCardShape: formData.get("giftCardShape"),
+    askGiftIntent: formData.get("askGiftIntent") === "on",
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
@@ -79,7 +87,11 @@ export async function updateSiteSettings(
         accentColor: parsed.data.accentColor ?? null,
         backgroundColor: parsed.data.backgroundColor ?? null,
         textColor: parsed.data.textColor ?? null,
+        mutedTextColor: parsed.data.mutedTextColor ?? null,
+        cardBackgroundColor: parsed.data.cardBackgroundColor ?? null,
+        borderColor: parsed.data.borderColor ?? null,
         giftCardShape: parsed.data.giftCardShape,
+        askGiftIntent: parsed.data.askGiftIntent,
         backgroundImageUrl,
         bannerImageUrl,
         profileImageUrl,
@@ -92,7 +104,11 @@ export async function updateSiteSettings(
         accentColor: parsed.data.accentColor ?? null,
         backgroundColor: parsed.data.backgroundColor ?? null,
         textColor: parsed.data.textColor ?? null,
+        mutedTextColor: parsed.data.mutedTextColor ?? null,
+        cardBackgroundColor: parsed.data.cardBackgroundColor ?? null,
+        borderColor: parsed.data.borderColor ?? null,
         giftCardShape: parsed.data.giftCardShape,
+        askGiftIntent: parsed.data.askGiftIntent,
         ...(backgroundImageUrl ? { backgroundImageUrl } : {}),
         ...(bannerImageUrl ? { bannerImageUrl } : {}),
         ...(profileImageUrl ? { profileImageUrl } : {}),

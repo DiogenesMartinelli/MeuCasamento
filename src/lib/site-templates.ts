@@ -95,6 +95,19 @@ export const SITE_TEMPLATES: SiteTemplateConfig[] = [
     cardClass: "border-rose-100 bg-white rounded-2xl",
     buttonRadius: "rounded-full",
   },
+  {
+    id: "CUSTOM",
+    label: "Outro",
+    description: "Ponto de partida neutro: escolha você mesmo todas as cores do site.",
+    swatch: ["#f5f5f5", "#a3a3a3", "#171717"],
+    headingFont: "font-sans font-semibold",
+    ornament: "",
+    heroOverlay: "bg-black/50",
+    accentText: "text-white/80",
+    sectionBg: "bg-background",
+    cardClass: "border-border bg-card",
+    buttonRadius: "rounded-md",
+  },
 ];
 
 export function getSiteTemplate(id: SiteTemplate | null | undefined): SiteTemplateConfig {

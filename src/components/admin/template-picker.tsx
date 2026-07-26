@@ -5,8 +5,19 @@ import { SITE_TEMPLATES } from "@/lib/site-templates";
 import { cn } from "@/lib/utils";
 import type { SiteTemplate } from "@/generated/prisma/client";
 
-export function TemplatePicker({ defaultValue }: { defaultValue: SiteTemplate }) {
+export function TemplatePicker({
+  defaultValue,
+  onChange,
+}: {
+  defaultValue: SiteTemplate;
+  onChange?: (value: SiteTemplate) => void;
+}) {
   const [selected, setSelected] = useState<SiteTemplate>(defaultValue);
+
+  function select(value: SiteTemplate) {
+    setSelected(value);
+    onChange?.(value);
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -18,7 +29,7 @@ export function TemplatePicker({ defaultValue }: { defaultValue: SiteTemplate })
             <button
               key={template.id}
               type="button"
-              onClick={() => setSelected(template.id)}
+              onClick={() => select(template.id)}
               className={cn(
                 "flex flex-col gap-2 rounded-lg border p-3 text-left transition-colors hover:border-foreground/40",
                 active ? "border-primary ring-2 ring-primary/30" : "border-border",

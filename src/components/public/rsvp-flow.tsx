@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import { respondRsvp } from "@/lib/actions/rsvp";
 import { Button } from "@/components/ui/button";
 import { GiftsList } from "@/components/public/gifts-list";
-import { getAccentButtonStyle, getTextStyle } from "@/lib/accent-color";
+import { getAccentButtonStyle, getTextStyle, getMutedTextStyle } from "@/lib/accent-color";
+import type { SiteColors } from "@/lib/accent-color";
 import type { SerializedGift } from "@/lib/queries/gifts";
 import type { Event, GiftCardShape, GuestStatus } from "@/generated/prisma/client";
 
@@ -23,9 +24,9 @@ export function RsvpFlow({
   events,
   headingFont,
   cardClass,
-  accentColor,
   giftCardShape,
-  textColor,
+  colors,
+  askGiftIntent = true,
 }: {
   familyToken: string;
   slug: string;
@@ -37,15 +38,16 @@ export function RsvpFlow({
   events: Event[];
   headingFont: string;
   cardClass: string;
-  accentColor?: string | null;
   giftCardShape?: GiftCardShape;
-  textColor?: string | null;
+  colors?: SiteColors;
+  askGiftIntent?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<GuestStatus>(initialStatus);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<Step>(initialStatus === "PENDING" ? "respond" : "thanks");
-  const accentStyle = getAccentButtonStyle(accentColor);
+  const accentStyle = getAccentButtonStyle(colors?.accentColor);
+  const mutedStyle = getMutedTextStyle(colors?.mutedTextColor);
 
   function handle(next: "CONFIRMED" | "DECLINED") {
     setError(null);
@@ -65,11 +67,11 @@ export function RsvpFlow({
       <div className="w-full max-w-6xl">
         <h1
           className={`mb-6 text-center text-3xl font-semibold ${headingFont}`}
-          style={getTextStyle(textColor)}
+          style={getTextStyle(colors?.textColor)}
         >
           Lista de Presentes
         </h1>
-        <GiftsList gifts={gifts} events={events} accentColor={accentColor} shape={giftCardShape} />
+        <GiftsList gifts={gifts} events={events} colors={colors} shape={giftCardShape} />
       </div>
     );
   }
@@ -80,7 +82,9 @@ export function RsvpFlow({
         <>
           <div>
             <h1 className={`text-3xl font-semibold ${headingFont}`}>Confirme sua presença</h1>
-            <p className="mt-2 opacity-80">{coupleName}</p>
+            <p className="mt-2 opacity-80" style={mutedStyle}>
+              {coupleName}
+            </p>
           </div>
 
           <ul className={`w-full divide-y rounded-lg border ${cardClass}`}>
@@ -111,8 +115,15 @@ export function RsvpFlow({
               Presença confirmada! Vemos vocês lá 🎉
             </p>
           )}
-          {status === "DECLINED" && <p className="font-medium opacity-80">{declineMessage}</p>}
-          <Button style={accentStyle} onClick={() => setStep("ask-gift")}>
+          {status === "DECLINED" && (
+            <p className="font-medium opacity-80" style={mutedStyle}>
+              {declineMessage}
+            </p>
+          )}
+          <Button
+            style={accentStyle}
+            onClick={() => setStep(askGiftIntent ? "ask-gift" : "gifts")}
+          >
             Continuar
           </Button>
         </div>
@@ -132,7 +143,11 @@ export function RsvpFlow({
         </div>
       )}
 
-      {step === "done" && <p className="font-medium opacity-80">Combinado! Até breve 💛</p>}
+      {step === "done" && (
+        <p className="font-medium opacity-80" style={mutedStyle}>
+          Combinado! Até breve 💛
+        </p>
+      )}
     </div>
   );
 }

@@ -6,29 +6,32 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GiftCheckoutDialog } from "./gift-checkout-dialog";
-import { getAccentButtonStyle, GIFT_CARD_SHAPE_CLASS } from "@/lib/accent-color";
+import { getAccentButtonStyle, getCardStyle, getMutedTextStyle, GIFT_CARD_SHAPE_CLASS } from "@/lib/accent-color";
 import { cn } from "@/lib/utils";
 import type { SerializedGift } from "@/lib/queries/gifts";
 import type { GiftCardShape } from "@/generated/prisma/client";
+import type { SiteColors } from "@/lib/accent-color";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
 export function GiftCard({
   gift,
-  accentColor,
+  colors,
   shape = "ROUNDED",
 }: {
   gift: SerializedGift;
-  accentColor?: string | null;
+  colors?: SiteColors;
   shape?: GiftCardShape;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const purchased = gift.status === "PURCHASED";
   const shapeClass = GIFT_CARD_SHAPE_CLASS[shape];
-  const accentStyle = purchased ? undefined : getAccentButtonStyle(accentColor);
+  const accentStyle = purchased ? undefined : getAccentButtonStyle(colors?.accentColor);
+  const cardStyle = getCardStyle(colors?.cardBackgroundColor, colors?.borderColor);
+  const mutedStyle = getMutedTextStyle(colors?.mutedTextColor);
 
   return (
-    <Card className="flex flex-col overflow-hidden py-0">
+    <Card className="flex flex-col overflow-hidden py-0" style={cardStyle}>
       {gift.imageUrl && (
         <div className={cn("relative h-44 w-full bg-muted", shapeClass.image)}>
           <Image
@@ -48,7 +51,10 @@ export function GiftCard({
       <CardHeader className="flex-1 pt-4">
         <CardTitle className="text-base">{gift.title}</CardTitle>
         {gift.description && (
-          <CardContent className="line-clamp-2 p-0 text-sm text-muted-foreground">
+          <CardContent
+            className="line-clamp-2 p-0 text-sm text-muted-foreground"
+            style={mutedStyle}
+          >
             {gift.description}
           </CardContent>
         )}
