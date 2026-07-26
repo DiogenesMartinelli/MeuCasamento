@@ -11,6 +11,7 @@ import { TemplatePicker } from "@/components/admin/template-picker";
 import { ShapePicker } from "@/components/admin/shape-picker";
 import { ColorPickerField } from "@/components/admin/color-picker-field";
 import { SitePreview } from "@/components/admin/site-preview";
+import { cn } from "@/lib/utils";
 import type { SiteColors } from "@/lib/accent-color";
 import type { GiftCardShape, SiteSettings, SiteTemplate } from "@/generated/prisma/client";
 
@@ -109,40 +110,43 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
           </div>
         </div>
 
-        {isCustom && (
-          <div className="grid gap-4 rounded-lg border border-dashed p-4 sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5">
-              <Label>Cor do texto secundário</Label>
-              <ColorPickerField
-                name="mutedTextColor"
-                ariaLabel="Escolher cor do texto secundário"
-                defaultValue={settings?.mutedTextColor}
-                onChange={updateColor("mutedTextColor")}
-              />
-              <p className="text-xs text-muted-foreground">Descrições, legendas e datas.</p>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label>Cor dos cards</Label>
-              <ColorPickerField
-                name="cardBackgroundColor"
-                ariaLabel="Escolher cor de fundo dos cards"
-                defaultValue={settings?.cardBackgroundColor}
-                onChange={updateColor("cardBackgroundColor")}
-              />
-              <p className="text-xs text-muted-foreground">Fundo dos cards de presente e recados.</p>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label>Cor das bordas</Label>
-              <ColorPickerField
-                name="borderColor"
-                ariaLabel="Escolher cor das bordas"
-                defaultValue={settings?.borderColor}
-                onChange={updateColor("borderColor")}
-              />
-              <p className="text-xs text-muted-foreground">Bordas dos cards e listas.</p>
-            </div>
+        <div
+          className={cn(
+            "grid gap-4 rounded-lg border border-dashed p-4 sm:grid-cols-3",
+            !isCustom && "hidden",
+          )}
+        >
+          <div className="flex flex-col gap-1.5">
+            <Label>Cor do texto secundário</Label>
+            <ColorPickerField
+              name="mutedTextColor"
+              ariaLabel="Escolher cor do texto secundário"
+              defaultValue={settings?.mutedTextColor}
+              onChange={updateColor("mutedTextColor")}
+            />
+            <p className="text-xs text-muted-foreground">Descrições, legendas e datas.</p>
           </div>
-        )}
+          <div className="flex flex-col gap-1.5">
+            <Label>Cor dos cards</Label>
+            <ColorPickerField
+              name="cardBackgroundColor"
+              ariaLabel="Escolher cor de fundo dos cards"
+              defaultValue={settings?.cardBackgroundColor}
+              onChange={updateColor("cardBackgroundColor")}
+            />
+            <p className="text-xs text-muted-foreground">Fundo dos cards de presente e recados.</p>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Cor das bordas</Label>
+            <ColorPickerField
+              name="borderColor"
+              ariaLabel="Escolher cor das bordas"
+              defaultValue={settings?.borderColor}
+              onChange={updateColor("borderColor")}
+            />
+            <p className="text-xs text-muted-foreground">Bordas dos cards e listas.</p>
+          </div>
+        </div>
         <p className="-mt-4 text-xs text-muted-foreground">
           Todas opcionais: o que não for definido usa a cor padrão do estilo escolhido acima.
         </p>
