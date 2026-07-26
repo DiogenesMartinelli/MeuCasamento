@@ -5,12 +5,17 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentAccount } from "@/lib/current-account";
 import { uploadImage } from "@/lib/storage";
+import { SITE_TEMPLATES } from "@/lib/site-templates";
+import type { SiteTemplate } from "@/generated/prisma/client";
 
 export type SiteSettingsFormState = { error?: string; success?: boolean };
+
+const templateIds = SITE_TEMPLATES.map((t) => t.id) as [SiteTemplate, ...SiteTemplate[]];
 
 const textSchema = z.object({
   coupleName: z.string().trim().min(1, "Informe o nome do casal").max(120),
   welcomeMessage: z.string().trim().max(500),
+  template: z.enum(templateIds),
 });
 
 async function uploadIfPresent(file: FormDataEntryValue | null, accountId: string, field: string) {
@@ -30,6 +35,7 @@ export async function updateSiteSettings(
   const parsed = textSchema.safeParse({
     coupleName: formData.get("coupleName"),
     welcomeMessage: formData.get("welcomeMessage"),
+    template: formData.get("template"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
@@ -48,6 +54,7 @@ export async function updateSiteSettings(
         accountId: account.id,
         coupleName: parsed.data.coupleName,
         welcomeMessage: parsed.data.welcomeMessage,
+        template: parsed.data.template,
         backgroundImageUrl,
         bannerImageUrl,
         profileImageUrl,
@@ -55,6 +62,7 @@ export async function updateSiteSettings(
       update: {
         coupleName: parsed.data.coupleName,
         welcomeMessage: parsed.data.welcomeMessage,
+        template: parsed.data.template,
         ...(backgroundImageUrl ? { backgroundImageUrl } : {}),
         ...(bannerImageUrl ? { bannerImageUrl } : {}),
         ...(profileImageUrl ? { profileImageUrl } : {}),

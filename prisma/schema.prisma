@@ -38,6 +38,15 @@ enum PaymentStatus {
   CANCELLED
 }
 
+enum SiteTemplate {
+  CLASSIC
+  MODERN
+  RUSTIC
+  BOHO
+  MINIMAL
+  ROMANTIC
+}
+
 /// One row per couple/wedding. Everything else in the system hangs off an Account,
 /// which is how the platform supports multiple weddings (multi-tenant).
 model Account {
@@ -57,15 +66,16 @@ model Account {
 }
 
 model SiteSettings {
-  id                 String   @id @default(uuid())
-  accountId          String   @unique
-  account            Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  coupleName         String   @default("")
-  welcomeMessage     String   @default("")
+  id                 String       @id @default(uuid())
+  accountId          String       @unique
+  account            Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  coupleName         String       @default("")
+  welcomeMessage     String       @default("")
   backgroundImageUrl String?
   bannerImageUrl     String?
   profileImageUrl    String?
-  updatedAt          DateTime @updatedAt
+  template           SiteTemplate @default(CLASSIC)
+  updatedAt          DateTime     @updatedAt
 
   @@map("site_settings")
 }

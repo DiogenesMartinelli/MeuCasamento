@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TemplatePicker } from "@/components/admin/template-picker";
 import type { SiteSettings } from "@/generated/prisma/client";
 
 const initialState: SiteSettingsFormState = {};
@@ -29,6 +30,11 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
           rows={3}
           defaultValue={settings?.welcomeMessage ?? ""}
         />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label>Estilo do site</Label>
+        <TemplatePicker defaultValue={settings?.template ?? "CLASSIC"} />
       </div>
 
       <ImageField
