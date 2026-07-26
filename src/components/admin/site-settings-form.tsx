@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { TemplatePicker } from "@/components/admin/template-picker";
+import { ShapePicker } from "@/components/admin/shape-picker";
+import { ColorPickerField } from "@/components/admin/color-picker-field";
 import type { SiteSettings } from "@/generated/prisma/client";
 
 const initialState: SiteSettingsFormState = {};
@@ -35,6 +37,19 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
       <div className="flex flex-col gap-1.5">
         <Label>Estilo do site</Label>
         <TemplatePicker defaultValue={settings?.template ?? "CLASSIC"} />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label>Cor de destaque (opcional)</Label>
+        <ColorPickerField defaultValue={settings?.accentColor} />
+        <p className="text-xs text-muted-foreground">
+          Sobrescreve a cor dos botões principais em cima do estilo escolhido acima.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label>Formato dos cards de presente</Label>
+        <ShapePicker defaultValue={settings?.giftCardShape ?? "ROUNDED"} />
       </div>
 
       <div className="flex flex-col gap-1.5">

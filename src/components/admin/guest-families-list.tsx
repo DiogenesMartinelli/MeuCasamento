@@ -116,6 +116,16 @@ export function GuestFamiliesList({
                 </label>
                 <div className="flex items-center gap-2">
                   <CopyLinkButton url={rsvpUrl} />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    nativeButton={false}
+                    render={
+                      <a href={rsvpUrl} target="_blank" rel="noopener noreferrer">
+                        Ver como convidado
+                      </a>
+                    }
+                  />
                   <InviteDialog
                     familyLabel={family.label}
                     familyPhone={family.phone}

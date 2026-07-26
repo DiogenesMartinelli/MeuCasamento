@@ -6,17 +6,29 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentAccount } from "@/lib/current-account";
 import { uploadImage } from "@/lib/storage";
 import { SITE_TEMPLATES } from "@/lib/site-templates";
-import type { SiteTemplate } from "@/generated/prisma/client";
+import { GIFT_CARD_SHAPE_OPTIONS } from "@/lib/accent-color";
+import type { SiteTemplate, GiftCardShape } from "@/generated/prisma/client";
 
 export type SiteSettingsFormState = { error?: string; success?: boolean };
 
 const templateIds = SITE_TEMPLATES.map((t) => t.id) as [SiteTemplate, ...SiteTemplate[]];
+const shapeIds = GIFT_CARD_SHAPE_OPTIONS.map((s) => s.id) as [GiftCardShape, ...GiftCardShape[]];
+
+const hexColor = z
+  .string()
+  .trim()
+  .regex(/^#[0-9a-fA-F]{6}$/, "Cor inválida")
+  .optional()
+  .or(z.literal(""))
+  .transform((v) => (v ? v : undefined));
 
 const textSchema = z.object({
   coupleName: z.string().trim().min(1, "Informe o nome do casal").max(120),
   welcomeMessage: z.string().trim().max(500),
   template: z.enum(templateIds),
   declineMessage: z.string().trim().min(1, "Escreva a mensagem de recusa").max(500),
+  accentColor: hexColor,
+  giftCardShape: z.enum(shapeIds),
 });
 
 async function uploadIfPresent(file: FormDataEntryValue | null, accountId: string, field: string) {
@@ -38,6 +50,8 @@ export async function updateSiteSettings(
     welcomeMessage: formData.get("welcomeMessage"),
     template: formData.get("template"),
     declineMessage: formData.get("declineMessage"),
+    accentColor: formData.get("accentColor"),
+    giftCardShape: formData.get("giftCardShape"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
@@ -58,6 +72,8 @@ export async function updateSiteSettings(
         welcomeMessage: parsed.data.welcomeMessage,
         template: parsed.data.template,
         declineMessage: parsed.data.declineMessage,
+        accentColor: parsed.data.accentColor ?? null,
+        giftCardShape: parsed.data.giftCardShape,
         backgroundImageUrl,
         bannerImageUrl,
         profileImageUrl,
@@ -67,6 +83,8 @@ export async function updateSiteSettings(
         welcomeMessage: parsed.data.welcomeMessage,
         template: parsed.data.template,
         declineMessage: parsed.data.declineMessage,
+        accentColor: parsed.data.accentColor ?? null,
+        giftCardShape: parsed.data.giftCardShape,
         ...(backgroundImageUrl ? { backgroundImageUrl } : {}),
         ...(bannerImageUrl ? { bannerImageUrl } : {}),
         ...(profileImageUrl ? { profileImageUrl } : {}),

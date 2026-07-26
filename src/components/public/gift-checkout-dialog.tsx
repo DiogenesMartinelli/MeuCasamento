@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Gift } from "@/generated/prisma/client";
+import type { SerializedGift } from "@/lib/queries/gifts";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -25,7 +25,7 @@ export function GiftCheckoutDialog({
   open,
   onOpenChange,
 }: {
-  gift: Gift;
+  gift: SerializedGift;
   open: boolean;
   onOpenChange: (value: boolean) => void;
 }) {

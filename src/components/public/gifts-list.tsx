@@ -3,9 +3,20 @@
 import { useMemo, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GiftCard } from "./gift-card";
-import type { Gift, Event } from "@/generated/prisma/client";
+import type { SerializedGift } from "@/lib/queries/gifts";
+import type { Event, GiftCardShape } from "@/generated/prisma/client";
 
-export function GiftsList({ gifts, events }: { gifts: Gift[]; events: Event[] }) {
+export function GiftsList({
+  gifts,
+  events,
+  accentColor,
+  shape,
+}: {
+  gifts: SerializedGift[];
+  events: Event[];
+  accentColor?: string | null;
+  shape?: GiftCardShape;
+}) {
   const [eventId, setEventId] = useState<string>("all");
 
   const filtered = useMemo(
@@ -33,7 +44,7 @@ export function GiftsList({ gifts, events }: { gifts: Gift[]; events: Event[] })
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((gift) => (
-            <GiftCard key={gift.id} gift={gift} />
+            <GiftCard key={gift.id} gift={gift} accentColor={accentColor} shape={shape} />
           ))}
         </div>
       )}

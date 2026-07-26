@@ -9,6 +9,7 @@ import { EventsBanner } from "@/components/public/events-banner";
 import { GuestMessageForm } from "@/components/public/guest-message-form";
 import { GuestMessageWall } from "@/components/public/guest-message-wall";
 import { Button } from "@/components/ui/button";
+import { getAccentButtonStyle } from "@/lib/accent-color";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -47,6 +48,7 @@ export default async function WeddingSitePage({ params }: PageProps) {
           </p>
           <Button
             className={`mt-6 ${template.buttonRadius}`}
+            style={getAccentButtonStyle(settings?.accentColor)}
             nativeButton={false}
             render={<Link href={`/c/${slug}/presentes`}>Ver lista de presentes</Link>}
           />

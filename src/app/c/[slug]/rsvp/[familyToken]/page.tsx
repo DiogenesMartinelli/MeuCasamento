@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { getAccountBySlug } from "@/lib/queries/account";
 import { getGuestFamily } from "@/lib/queries/guests";
+import { getGiftsForAccount } from "@/lib/queries/gifts";
 import { getSiteTemplate } from "@/lib/site-templates";
-import { RsvpActions } from "@/components/public/rsvp-actions";
+import { RsvpFlow } from "@/components/public/rsvp-flow";
 
 type PageProps = { params: Promise<{ slug: string; familyToken: string }> };
 
@@ -15,34 +16,29 @@ export default async function RsvpPage({ params }: PageProps) {
   const familyGuests = guests.filter((guest) => guest.event.accountId === account.id);
   if (familyGuests.length === 0) notFound();
 
+  const gifts = await getGiftsForAccount(account.id);
   const template = getSiteTemplate(account.siteSettings?.template);
 
   return (
     <main
-      className={`mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center gap-8 px-6 py-16 text-center ${template.sectionBg}`}
+      className={`mx-auto flex min-h-screen w-full flex-col items-center justify-center gap-8 px-6 py-16 ${template.sectionBg}`}
     >
-      <div>
-        <h1 className={`text-3xl font-semibold ${template.headingFont}`}>Confirme sua presença</h1>
-        <p className="mt-2 text-muted-foreground">{account.siteSettings?.coupleName}</p>
-      </div>
-
-      <ul className={`w-full divide-y rounded-lg border ${template.cardClass}`}>
-        {familyGuests.map((guest) => (
-          <li key={guest.id} className="flex items-center justify-between px-4 py-3">
-            <span className="font-medium">{guest.name}</span>
-            <span className="text-xs text-muted-foreground">{guest.event.name}</span>
-          </li>
-        ))}
-      </ul>
-
-      <RsvpActions
+      <RsvpFlow
         familyToken={familyToken}
         slug={slug}
+        coupleName={account.siteSettings?.coupleName || ""}
+        familyGuests={familyGuests}
         initialStatus={familyGuests[0].status}
         declineMessage={
           account.siteSettings?.declineMessage ||
           "Que pena! Sentiremos sua falta, mas agradecemos por avisar. 💛"
         }
+        gifts={gifts}
+        events={account.events}
+        headingFont={template.headingFont}
+        cardClass={template.cardClass}
+        accentColor={account.siteSettings?.accentColor}
+        giftCardShape={account.siteSettings?.giftCardShape}
       />
     </main>
   );

@@ -32,7 +32,12 @@ export default async function GiftsPage({ params }: PageProps) {
           {account.siteSettings?.coupleName || "os noivos"}.
         </p>
         <div className="mt-10">
-          <GiftsList gifts={gifts} events={account.events} />
+          <GiftsList
+            gifts={gifts}
+            events={account.events}
+            accentColor={account.siteSettings?.accentColor}
+            shape={account.siteSettings?.giftCardShape}
+          />
         </div>
       </div>
     </main>

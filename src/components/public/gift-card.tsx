@@ -6,18 +6,31 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GiftCheckoutDialog } from "./gift-checkout-dialog";
-import type { Gift } from "@/generated/prisma/client";
+import { getAccentButtonStyle, GIFT_CARD_SHAPE_CLASS } from "@/lib/accent-color";
+import { cn } from "@/lib/utils";
+import type { SerializedGift } from "@/lib/queries/gifts";
+import type { GiftCardShape } from "@/generated/prisma/client";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
-export function GiftCard({ gift }: { gift: Gift }) {
+export function GiftCard({
+  gift,
+  accentColor,
+  shape = "ROUNDED",
+}: {
+  gift: SerializedGift;
+  accentColor?: string | null;
+  shape?: GiftCardShape;
+}) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const purchased = gift.status === "PURCHASED";
+  const shapeClass = GIFT_CARD_SHAPE_CLASS[shape];
+  const accentStyle = purchased ? undefined : getAccentButtonStyle(accentColor);
 
   return (
     <Card className="flex flex-col overflow-hidden py-0">
       {gift.imageUrl && (
-        <div className="relative h-44 w-full bg-muted">
+        <div className={cn("relative h-44 w-full bg-muted", shapeClass.image)}>
           <Image
             src={gift.imageUrl}
             alt={gift.title}
@@ -51,6 +64,8 @@ export function GiftCard({ gift }: { gift: Gift }) {
           <Button
             disabled={purchased}
             variant={purchased ? "secondary" : "default"}
+            className={shapeClass.button}
+            style={accentStyle}
             nativeButton={false}
             render={
               <a href={gift.productUrl ?? "#"} target="_blank" rel="noopener noreferrer">
@@ -59,7 +74,12 @@ export function GiftCard({ gift }: { gift: Gift }) {
             }
           />
         ) : (
-          <Button disabled={purchased} onClick={() => setDialogOpen(true)}>
+          <Button
+            disabled={purchased}
+            className={shapeClass.button}
+            style={accentStyle}
+            onClick={() => setDialogOpen(true)}
+          >
             {purchased ? "Já presenteado" : "Presentear"}
           </Button>
         )}
