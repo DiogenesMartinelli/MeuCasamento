@@ -5,20 +5,31 @@ import { GIFT_CARD_SHAPE_OPTIONS, GIFT_CARD_SHAPE_CLASS } from "@/lib/accent-col
 import { cn } from "@/lib/utils";
 import type { GiftCardShape } from "@/generated/prisma/client";
 
-export function ShapePicker({ defaultValue }: { defaultValue: GiftCardShape }) {
+export function ShapePicker({
+  defaultValue,
+  onChange,
+}: {
+  defaultValue: GiftCardShape;
+  onChange?: (value: GiftCardShape) => void;
+}) {
   const [selected, setSelected] = useState<GiftCardShape>(defaultValue);
+
+  function select(value: GiftCardShape) {
+    setSelected(value);
+    onChange?.(value);
+  }
 
   return (
     <div className="flex flex-col gap-2">
       <input type="hidden" name="giftCardShape" value={selected} />
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         {GIFT_CARD_SHAPE_OPTIONS.map((option) => {
           const active = option.id === selected;
           return (
             <button
               key={option.id}
               type="button"
-              onClick={() => setSelected(option.id)}
+              onClick={() => select(option.id)}
               className={cn(
                 "flex flex-col items-center gap-2 rounded-lg border p-3 transition-colors hover:border-foreground/40",
                 active ? "border-primary ring-2 ring-primary/30" : "border-border",
