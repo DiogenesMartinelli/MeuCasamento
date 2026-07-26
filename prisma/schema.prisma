@@ -2,8 +2,11 @@
 // https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma"
+  // "client" = the WASM/JS query compiler, so the query engine binary is never
+  // needed at all - the pg driver adapter (src/lib/prisma.ts) handles everything.
+  engineType = "client"
 }
 
 datasource db {
