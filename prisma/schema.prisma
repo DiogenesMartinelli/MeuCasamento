@@ -181,6 +181,25 @@ model Payment {
   @@map("payments")
 }
 
+/// A one-time payment required to unlock account creation - the couple pays before
+/// they ever get a Supabase Auth user or an Account. Card-only, goes to the
+/// platform owner's Mercado Pago account (this is platform revenue, not a gift).
+model RegistrationPayment {
+  id             String        @id @default(uuid())
+  email          String
+  status         PaymentStatus @default(PENDING)
+  mpPreferenceId String?
+  mpPaymentId    String?       @unique
+  amount         Decimal       @db.Decimal(10, 2)
+  /// Set once this payment has been consumed to create an Account, so it can't be reused.
+  usedAt         DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([email])
+  @@map("registration_payments")
+}
+
 model GuestMessage {
   id         String   @id @default(uuid())
   accountId  String

@@ -73,26 +73,38 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  const paymentRecord = await prisma.payment.findUnique({
+  const newStatus = STATUS_MAP[mpPayment.status ?? ""] ?? "PENDING";
+
+  const giftPayment = await prisma.payment.findUnique({
     where: { id: externalReference },
     include: { gift: true },
   });
-  if (!paymentRecord) {
+
+  if (giftPayment) {
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: { id: giftPayment.id },
+        data: { status: newStatus, mpPaymentId: String(mpPayment.id) },
+      });
+
+      if (newStatus === "APPROVED" && giftPayment.gift.status !== "PURCHASED") {
+        await tx.gift.update({ where: { id: giftPayment.giftId }, data: { status: "PURCHASED" } });
+      }
+    });
+
     return NextResponse.json({ received: true });
   }
 
-  const newStatus = STATUS_MAP[mpPayment.status ?? ""] ?? "PENDING";
+  const registrationPayment = await prisma.registrationPayment.findUnique({
+    where: { id: externalReference },
+  });
 
-  await prisma.$transaction(async (tx) => {
-    await tx.payment.update({
-      where: { id: paymentRecord.id },
+  if (registrationPayment) {
+    await prisma.registrationPayment.update({
+      where: { id: registrationPayment.id },
       data: { status: newStatus, mpPaymentId: String(mpPayment.id) },
     });
-
-    if (newStatus === "APPROVED" && paymentRecord.gift.status !== "PURCHASED") {
-      await tx.gift.update({ where: { id: paymentRecord.giftId }, data: { status: "PURCHASED" } });
-    }
-  });
+  }
 
   return NextResponse.json({ received: true });
 }

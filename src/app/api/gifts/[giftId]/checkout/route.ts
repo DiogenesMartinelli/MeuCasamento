@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { Payment as MPPayment, Preference as MPPreference } from "mercadopago";
 import { prisma } from "@/lib/prisma";
-import { mercadopago } from "@/lib/mercadopago";
+import { mercadopago, mpErrorMessage, autoReturnFor } from "@/lib/mercadopago";
 
 const bodySchema = z.object({
   method: z.enum(["pix", "checkout_pro"]),
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           pending: `${appUrl}/presentes?status=pending`,
           failure: `${appUrl}/presentes?status=failure`,
         },
-        auto_return: "approved",
+        auto_return: autoReturnFor(appUrl),
         notification_url: `${appUrl}/api/webhooks/mercadopago`,
         external_reference: paymentRecord.id,
       },
@@ -117,7 +117,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
   } catch (err) {
     await prisma.payment.update({ where: { id: paymentRecord.id }, data: { status: "CANCELLED" } });
-    const message = err instanceof Error ? err.message : "Erro ao iniciar pagamento";
-    return NextResponse.json({ error: message }, { status: 502 });
+    return NextResponse.json({ error: mpErrorMessage(err, "Erro ao iniciar pagamento") }, { status: 502 });
   }
 }
