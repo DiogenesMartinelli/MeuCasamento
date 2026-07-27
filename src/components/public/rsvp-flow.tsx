@@ -4,10 +4,13 @@ import { useState, useTransition } from "react";
 import { respondRsvp } from "@/lib/actions/rsvp";
 import { Button } from "@/components/ui/button";
 import { GiftsList } from "@/components/public/gifts-list";
-import { getAccentButtonStyle, getTextStyle, getMutedTextStyle } from "@/lib/accent-color";
+import { getAccentButtonStyle, getCardStyle, getTextStyle, getMutedTextStyle, getSectionStyle } from "@/lib/accent-color";
 import type { SiteColors } from "@/lib/accent-color";
+import { getRsvpFontClass } from "@/lib/rsvp-theme";
+import { AnimatedBackground, ConfirmBurst, LightingOverlay, Sparkles, StringLights } from "@/components/public/rsvp-decorations";
+import { cn } from "@/lib/utils";
 import type { SerializedGift } from "@/lib/queries/gifts";
-import type { Event, GiftCardShape, GuestStatus } from "@/generated/prisma/client";
+import type { Event, GiftCardShape, GuestStatus, RsvpTheme } from "@/generated/prisma/client";
 
 type Step = "respond" | "thanks" | "ask-gift" | "gifts" | "done";
 
@@ -23,10 +26,12 @@ export function RsvpFlow({
   gifts,
   events,
   headingFont,
+  sectionBgClass,
   cardClass,
   giftCardShape,
   colors,
   askGiftIntent = true,
+  rsvpTheme,
 }: {
   familyToken: string;
   slug: string;
@@ -37,17 +42,39 @@ export function RsvpFlow({
   gifts: SerializedGift[];
   events: Event[];
   headingFont: string;
+  sectionBgClass: string;
   cardClass: string;
   giftCardShape?: GiftCardShape;
   colors?: SiteColors;
   askGiftIntent?: boolean;
+  rsvpTheme?: RsvpTheme | null;
 }) {
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<GuestStatus>(initialStatus);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<Step>(initialStatus === "PENDING" ? "respond" : "thanks");
+  const [justConfirmed, setJustConfirmed] = useState(false);
   const accentStyle = getAccentButtonStyle(colors?.accentColor);
   const mutedStyle = getMutedTextStyle(colors?.mutedTextColor);
+
+  const useCustomBg = !!rsvpTheme?.useCustomStyle;
+  const backgroundType = useCustomBg ? rsvpTheme?.backgroundType ?? "INHERIT" : "INHERIT";
+  const usesFlatBackground = backgroundType === "INHERIT" || backgroundType === "COLOR";
+  const usesMedia = backgroundType === "IMAGE" || backgroundType === "VIDEO";
+  const needsLightText = usesMedia && !colors?.textColor;
+
+  const resolvedHeadingFont = getRsvpFontClass(useCustomBg ? rsvpTheme?.fontFamily : undefined, headingFont);
+  const confirmedFontSource =
+    useCustomBg && rsvpTheme?.confirmedFontFamily && rsvpTheme.confirmedFontFamily !== "INHERIT"
+      ? rsvpTheme.confirmedFontFamily
+      : useCustomBg
+        ? rsvpTheme?.fontFamily
+        : undefined;
+  const confirmedFont = getRsvpFontClass(confirmedFontSource, resolvedHeadingFont);
+  const confirmedTextStyle =
+    useCustomBg && rsvpTheme?.confirmedTextColor
+      ? { color: rsvpTheme.confirmedTextColor }
+      : getTextStyle(colors?.textColor);
 
   function handle(next: "CONFIRMED" | "DECLINED") {
     setError(null);
@@ -56,98 +83,136 @@ export function RsvpFlow({
         await respondRsvp(familyToken, slug, next);
         setStatus(next);
         setStep("thanks");
+        if (next === "CONFIRMED") setJustConfirmed(true);
       } catch {
         setError("Não foi possível registrar sua resposta. Tente novamente.");
       }
     });
   }
 
-  if (step === "gifts") {
-    return (
-      <div className="w-full max-w-6xl">
-        <h1
-          className={`mb-6 text-center text-3xl font-semibold ${headingFont}`}
-          style={getTextStyle(colors?.textColor)}
-        >
-          Lista de Presentes
-        </h1>
-        <GiftsList gifts={gifts} events={events} colors={colors} shape={giftCardShape} />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex w-full max-w-lg flex-col items-center gap-8 text-center">
-      {step === "respond" && (
-        <>
-          <div>
-            <h1 className={`text-3xl font-semibold ${headingFont}`}>Confirme sua presença</h1>
-            <p className="mt-2 opacity-80" style={mutedStyle}>
-              {coupleName}
-            </p>
+    <div
+      className={cn("relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6 py-16", usesFlatBackground && sectionBgClass)}
+      style={usesFlatBackground ? getSectionStyle(colors?.backgroundColor, colors?.textColor, colors?.backgroundGradientTo) : undefined}
+    >
+      {useCustomBg && backgroundType === "IMAGE" && rsvpTheme?.backgroundImageUrl && (
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${rsvpTheme.backgroundImageUrl})` }}
+        />
+      )}
+      {useCustomBg && backgroundType === "VIDEO" && rsvpTheme?.backgroundVideoUrl && (
+        <video
+          src={rsvpTheme.backgroundVideoUrl}
+          className="absolute inset-0 z-0 h-full w-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      )}
+      {useCustomBg && usesMedia && <div className="absolute inset-0 z-0 bg-black/40" />}
+      {useCustomBg && backgroundType === "ANIMATED" && rsvpTheme?.animatedBackground && (
+        <AnimatedBackground preset={rsvpTheme.animatedBackground} />
+      )}
+      {useCustomBg && rsvpTheme?.lightingEffect && rsvpTheme.lightingEffect !== "NONE" && (
+        <LightingOverlay effect={rsvpTheme.lightingEffect} />
+      )}
+      {useCustomBg && rsvpTheme?.showStringLights && <StringLights />}
+      {useCustomBg && rsvpTheme?.showSparkles && <Sparkles />}
+      {useCustomBg && (
+        <ConfirmBurst variant={rsvpTheme?.confirmAnimation ?? "NONE"} active={justConfirmed} />
+      )}
+
+      <div className={cn("relative z-10 w-full", needsLightText && "text-white", step === "gifts" ? "max-w-6xl" : "max-w-lg")}>
+        {step === "gifts" ? (
+          <>
+            <h1
+              className={cn("mb-6 text-center text-3xl font-semibold", resolvedHeadingFont)}
+              style={getTextStyle(colors?.textColor)}
+            >
+              Lista de Presentes
+            </h1>
+            <GiftsList gifts={gifts} events={events} colors={colors} shape={giftCardShape} />
+          </>
+        ) : (
+          <div key={step} className="flex flex-col items-center gap-8 text-center motion-safe:animate-rsvp-step-in">
+            {step === "respond" && (
+              <>
+                <div>
+                  <h1 className={cn("text-3xl font-semibold", resolvedHeadingFont)}>Confirme sua presença</h1>
+                  <p className="mt-2 opacity-80" style={mutedStyle}>
+                    {coupleName}
+                  </p>
+                </div>
+
+                <ul
+                  className={cn("w-full divide-y rounded-lg border", cardClass)}
+                  style={getCardStyle(colors?.cardBackgroundColor, colors?.borderColor, colors?.cardBackgroundGradientTo, colors?.glassCards)}
+                >
+                  {familyGuests.map((guest) => (
+                    <li key={guest.id} className="flex items-center justify-between px-4 py-3">
+                      <span className="font-medium">{guest.name}</span>
+                      <span className="text-xs text-muted-foreground">{guest.event.name}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                <div className="flex gap-3">
+                  <Button style={accentStyle} onClick={() => handle("CONFIRMED")} disabled={isPending}>
+                    Confirmar presença
+                  </Button>
+                  <Button variant="outline" onClick={() => handle("DECLINED")} disabled={isPending}>
+                    Não poderei ir
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {step === "thanks" && (
+              <div className="flex flex-col items-center gap-4">
+                {status === "CONFIRMED" && (
+                  <p className={cn("font-medium", confirmedFont)} style={confirmedTextStyle}>
+                    Presença confirmada! Vemos vocês lá 🎉
+                  </p>
+                )}
+                {status === "DECLINED" && (
+                  <p className="font-medium opacity-80" style={mutedStyle}>
+                    {declineMessage}
+                  </p>
+                )}
+                <Button
+                  style={accentStyle}
+                  onClick={() => setStep(askGiftIntent ? "ask-gift" : "gifts")}
+                >
+                  Continuar
+                </Button>
+              </div>
+            )}
+
+            {step === "ask-gift" && (
+              <div className="flex flex-col items-center gap-4">
+                <p className="font-medium">Quer presentear o casal?</p>
+                <div className="flex gap-3">
+                  <Button style={accentStyle} onClick={() => setStep("gifts")}>
+                    Sim, quero ver os presentes
+                  </Button>
+                  <Button variant="outline" onClick={() => setStep("done")}>
+                    Agora não
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {step === "done" && (
+              <p className="font-medium opacity-80" style={mutedStyle}>
+                Combinado! Até breve 💛
+              </p>
+            )}
           </div>
-
-          <ul className={`w-full divide-y rounded-lg border ${cardClass}`}>
-            {familyGuests.map((guest) => (
-              <li key={guest.id} className="flex items-center justify-between px-4 py-3">
-                <span className="font-medium">{guest.name}</span>
-                <span className="text-xs text-muted-foreground">{guest.event.name}</span>
-              </li>
-            ))}
-          </ul>
-
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <div className="flex gap-3">
-            <Button style={accentStyle} onClick={() => handle("CONFIRMED")} disabled={isPending}>
-              Confirmar presença
-            </Button>
-            <Button variant="outline" onClick={() => handle("DECLINED")} disabled={isPending}>
-              Não poderei ir
-            </Button>
-          </div>
-        </>
-      )}
-
-      {step === "thanks" && (
-        <div className="flex flex-col items-center gap-4">
-          {status === "CONFIRMED" && (
-            <p className="font-medium text-green-600 dark:text-green-400">
-              Presença confirmada! Vemos vocês lá 🎉
-            </p>
-          )}
-          {status === "DECLINED" && (
-            <p className="font-medium opacity-80" style={mutedStyle}>
-              {declineMessage}
-            </p>
-          )}
-          <Button
-            style={accentStyle}
-            onClick={() => setStep(askGiftIntent ? "ask-gift" : "gifts")}
-          >
-            Continuar
-          </Button>
-        </div>
-      )}
-
-      {step === "ask-gift" && (
-        <div className="flex flex-col items-center gap-4">
-          <p className="font-medium">Quer presentear o casal?</p>
-          <div className="flex gap-3">
-            <Button style={accentStyle} onClick={() => setStep("gifts")}>
-              Sim, quero ver os presentes
-            </Button>
-            <Button variant="outline" onClick={() => setStep("done")}>
-              Agora não
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {step === "done" && (
-        <p className="font-medium opacity-80" style={mutedStyle}>
-          Combinado! Até breve 💛
-        </p>
-      )}
+        )}
+      </div>
     </div>
   );
 }

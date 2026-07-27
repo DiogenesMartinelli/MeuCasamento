@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useState, type ChangeEvent } from "react";
-import Image from "next/image";
+import { useActionState, useState } from "react";
 import { updateSiteSettings, type SiteSettingsFormState } from "@/lib/actions/site-settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,7 @@ import { TemplatePicker } from "@/components/admin/template-picker";
 import { ShapePicker } from "@/components/admin/shape-picker";
 import { ColorPickerField } from "@/components/admin/color-picker-field";
 import { GradientColorField } from "@/components/admin/gradient-color-field";
+import { ImageField } from "@/components/admin/image-field";
 import { SitePreview } from "@/components/admin/site-preview";
 import { cn } from "@/lib/utils";
 import type { SiteColors } from "@/lib/accent-color";
@@ -257,35 +257,6 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
           />
         </div>
       </div>
-    </div>
-  );
-}
-
-function ImageField({
-  name,
-  label,
-  currentUrl,
-  onPreview,
-}: {
-  name: string;
-  label: string;
-  currentUrl?: string | null;
-  onPreview?: (url: string) => void;
-}) {
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file && onPreview) onPreview(URL.createObjectURL(file));
-  }
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Label htmlFor={name}>{label}</Label>
-      {currentUrl && (
-        <div className="relative h-32 w-full max-w-xs overflow-hidden rounded-md border bg-muted sm:h-40">
-          <Image src={currentUrl} alt={label} fill className="object-cover" unoptimized={currentUrl.startsWith("blob:")} />
-        </div>
-      )}
-      <Input id={name} name={name} type="file" accept="image/*" onChange={handleChange} />
     </div>
   );
 }

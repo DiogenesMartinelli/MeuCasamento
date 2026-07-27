@@ -58,6 +58,42 @@ enum GiftCardShape {
   OVAL
 }
 
+enum RsvpBackgroundType {
+  INHERIT
+  COLOR
+  IMAGE
+  VIDEO
+  ANIMATED
+}
+
+enum RsvpAnimatedBackground {
+  PETALS
+  SNOW
+  STARS
+  FIREFLIES
+}
+
+enum RsvpLightingEffect {
+  NONE
+  GLOW
+  SPOTLIGHT
+  CANDLELIGHT
+}
+
+enum RsvpFontFamily {
+  INHERIT
+  SANS
+  SERIF
+  SCRIPT
+}
+
+enum RsvpConfirmAnimation {
+  NONE
+  CONFETTI
+  HEARTS
+  FIREWORKS
+}
+
 /// One row per couple/wedding. Everything else in the system hangs off an Account,
 /// which is how the platform supports multiple weddings (multi-tenant).
 model Account {
@@ -82,6 +118,7 @@ model Account {
   reminderOneMonthSentAt  DateTime?
 
   siteSettings         SiteSettings?
+  rsvpTheme            RsvpTheme?
   events               Event[]
   guestMessages        GuestMessage[]
   registrationPayments RegistrationPayment[]
@@ -122,6 +159,49 @@ model SiteSettings {
   updatedAt                DateTime      @updatedAt
 
   @@map("site_settings")
+}
+
+/// Optional ambiance customization scoped to the RSVP page only, kept separate from
+/// SiteSettings so the two settings screens save independently and RSVP theming
+/// never risks the main site. When useCustomStyle is false the RSVP page just
+/// inherits SiteSettings, unchanged from before this model existed.
+model RsvpTheme {
+  id        String  @id @default(uuid())
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  useCustomStyle Boolean @default(false)
+
+  backgroundType       RsvpBackgroundType      @default(INHERIT)
+  backgroundColor      String?
+  /// When set alongside backgroundColor, the background renders as a gradient.
+  backgroundGradientTo String?
+  backgroundImageUrl   String?
+  backgroundVideoUrl   String?
+  animatedBackground   RsvpAnimatedBackground?
+
+  accentColor              String?
+  textColor                String?
+  mutedTextColor           String?
+  cardBackgroundColor      String?
+  cardBackgroundGradientTo String?
+  borderColor              String?
+  fontFamily               RsvpFontFamily @default(INHERIT)
+
+  /// Optional overrides applied only to the "thanks" step, shown right after the
+  /// guest confirms or declines - lets that moment stand out from the rest of the flow.
+  confirmedTextColor   String?
+  confirmedFontFamily  RsvpFontFamily?
+
+  lightingEffect   RsvpLightingEffect   @default(NONE)
+  showSparkles     Boolean              @default(false)
+  showStringLights Boolean              @default(false)
+  glassCards       Boolean              @default(false)
+  confirmAnimation RsvpConfirmAnimation @default(NONE)
+
+  updatedAt DateTime @updatedAt
+
+  @@map("rsvp_themes")
 }
 
 model Event {

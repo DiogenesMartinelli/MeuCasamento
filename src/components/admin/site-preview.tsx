@@ -144,7 +144,7 @@ function SitePreviewHome({
             <div
               key={gift.id}
               className={cn("overflow-hidden rounded-lg border text-left", template.cardClass)}
-              style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo)}
+              style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards)}
             >
               <div className={cn("h-16 w-full bg-muted", shapeClass.image)} />
               <div className="p-2">
@@ -199,7 +199,7 @@ function RsvpPreview({
           </div>
           <div
             className={cn("w-full max-w-[220px] rounded-lg border px-3 py-2 text-xs", template.cardClass)}
-            style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo)}
+            style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards)}
           >
             Convidado Exemplo
           </div>
@@ -293,7 +293,7 @@ function RsvpPreview({
               <div
                 key={gift.id}
                 className={cn("overflow-hidden rounded-lg border text-left", template.cardClass)}
-                style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo)}
+                style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards)}
               >
                 <div className={cn("h-16 w-full bg-muted", shapeClass.image)} />
                 <div className="p-2">

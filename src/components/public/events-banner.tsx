@@ -28,7 +28,7 @@ export function EventsBanner({
 
   const cardStyle = bannerImageUrl
     ? undefined
-    : getCardStyle(colors?.cardBackgroundColor, colors?.borderColor, colors?.cardBackgroundGradientTo);
+    : getCardStyle(colors?.cardBackgroundColor, colors?.borderColor, colors?.cardBackgroundGradientTo, colors?.glassCards);
   const mutedStyle = bannerImageUrl ? undefined : getMutedTextStyle(colors?.mutedTextColor);
 
   return (

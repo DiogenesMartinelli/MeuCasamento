@@ -17,7 +17,7 @@ export async function getCurrentAccount() {
 
   const account = await prisma.account.findUnique({
     where: { ownerUserId: user.id },
-    include: { siteSettings: true },
+    include: { siteSettings: true, rsvpTheme: true },
   });
 
   return account;

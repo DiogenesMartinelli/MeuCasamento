@@ -31,6 +31,7 @@ export function GiftCard({
     colors?.cardBackgroundColor,
     colors?.borderColor,
     colors?.cardBackgroundGradientTo,
+    colors?.glassCards,
   );
   const mutedStyle = getMutedTextStyle(colors?.mutedTextColor);
 

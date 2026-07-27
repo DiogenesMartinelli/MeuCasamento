@@ -27,6 +27,7 @@ export function GuestMessageWall({
     colors?.cardBackgroundColor,
     colors?.borderColor,
     colors?.cardBackgroundGradientTo,
+    colors?.glassCards,
   );
 
   return (

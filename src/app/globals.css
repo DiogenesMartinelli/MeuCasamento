@@ -130,3 +130,86 @@
     @apply font-sans;
   }
 }
+
+/*
+ * RSVP decoration animations (src/components/public/rsvp-decorations.tsx). Every
+ * usage is gated behind Tailwind's `motion-safe:` variant, so these simply don't
+ * apply when the visitor has requested reduced motion - no extra media query needed.
+ */
+@theme {
+  --animate-rsvp-bulb: rsvp-bulb 1.8s ease-in-out infinite;
+  @keyframes rsvp-bulb {
+    0%, 100% { opacity: 0.55; filter: brightness(0.8); }
+    50% { opacity: 1; filter: brightness(1.3); }
+  }
+
+  --animate-rsvp-sparkle: rsvp-sparkle 3s ease-in-out infinite;
+  @keyframes rsvp-sparkle {
+    0%, 100% { opacity: 0; transform: scale(0.4); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  --animate-rsvp-fall: rsvp-fall linear infinite;
+  @keyframes rsvp-fall {
+    0% { transform: translateY(-10%) translateX(0) rotate(0deg); opacity: 0.9; }
+    50% { transform: translateY(50%) translateX(12px) rotate(180deg); }
+    100% { transform: translateY(120%) translateX(-8px) rotate(360deg); opacity: 0.7; }
+  }
+
+  --animate-rsvp-fall-straight: rsvp-fall-straight linear infinite;
+  @keyframes rsvp-fall-straight {
+    0% { transform: translateY(-10%) translateX(0); opacity: 0.9; }
+    50% { transform: translateY(55%) translateX(6px); }
+    100% { transform: translateY(120%) translateX(-4px); opacity: 0.6; }
+  }
+
+  --animate-rsvp-drift: rsvp-drift ease-in-out infinite;
+  @keyframes rsvp-drift {
+    0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+    25% { transform: translate(10px, -14px); opacity: 1; }
+    50% { transform: translate(-6px, -6px); opacity: 0.6; }
+    75% { transform: translate(8px, 10px); opacity: 1; }
+  }
+
+  --animate-rsvp-glow: rsvp-glow 4s ease-in-out infinite;
+  @keyframes rsvp-glow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+  }
+
+  --animate-rsvp-spotlight: rsvp-spotlight 6s ease-in-out infinite;
+  @keyframes rsvp-spotlight {
+    0%, 100% { transform: translateX(-15%); }
+    50% { transform: translateX(15%); }
+  }
+
+  --animate-rsvp-flicker: rsvp-flicker 2.5s ease-in-out infinite;
+  @keyframes rsvp-flicker {
+    0%, 100% { opacity: 0.55; }
+    10% { opacity: 0.7; }
+    20% { opacity: 0.5; }
+    35% { opacity: 0.75; }
+    50% { opacity: 0.6; }
+    65% { opacity: 0.8; }
+    80% { opacity: 0.5; }
+    90% { opacity: 0.7; }
+  }
+
+  --animate-rsvp-burst: rsvp-burst 900ms ease-out forwards;
+  @keyframes rsvp-burst {
+    0% {
+      transform: translate(-50%, -50%) rotate(var(--rsvp-burst-angle)) translateX(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(var(--rsvp-burst-angle)) translateX(var(--rsvp-burst-distance)) scale(0.4);
+      opacity: 0;
+    }
+  }
+
+  --animate-rsvp-step-in: rsvp-step-in 0.4s ease-out;
+  @keyframes rsvp-step-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

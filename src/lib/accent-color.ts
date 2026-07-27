@@ -13,6 +13,8 @@ export type SiteColors = {
   /** Same idea as backgroundGradientTo, but for card surfaces. */
   cardBackgroundGradientTo?: string | null;
   borderColor?: string | null;
+  /** Frosted-glass card look ("vitrificação") - overrides cardBackgroundColor/borderColor when set. */
+  glassCards?: boolean | null;
 };
 
 /** Picks readable text color (black/white) for a given hex background. */
@@ -85,12 +87,22 @@ export function getMutedTextStyle(mutedTextColor?: string | null): CSSProperties
   return { color: mutedTextColor };
 }
 
+/** Frosted-glass look for cards ("vitrificação"): translucent surface + blurred backdrop. */
+const GLASS_CARD_STYLE: CSSProperties = {
+  backgroundColor: "rgba(255, 255, 255, 0.14)",
+  borderColor: "rgba(255, 255, 255, 0.35)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+};
+
 /** Inline style overriding a card/surface's background (flat or gradient) and border color. */
 export function getCardStyle(
   cardBackgroundColor?: string | null,
   borderColor?: string | null,
   cardBackgroundGradientTo?: string | null,
+  glassCards?: boolean | null,
 ): CSSProperties | undefined {
+  if (glassCards) return GLASS_CARD_STYLE;
   if (!cardBackgroundColor && !borderColor) return undefined;
   return {
     ...backgroundFill(cardBackgroundColor, cardBackgroundGradientTo),
