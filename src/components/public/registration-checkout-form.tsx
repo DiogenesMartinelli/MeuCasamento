@@ -27,19 +27,28 @@ export function RegistrationCheckoutForm() {
         />
       </div>
 
-      <div className="flex items-start gap-2">
-        <Checkbox id="termsAccepted" name="termsAccepted" required className="mt-0.5" />
-        <Label htmlFor="termsAccepted" className="text-sm font-normal text-muted-foreground">
+      <div className="flex items-start gap-2.5">
+        <Checkbox id="termsAccepted" name="termsAccepted" required className="mt-0.5 shrink-0" />
+        {/* Plain <label>, not the shadcn Label component: that one is flex-based for
+            label+icon pairs, which breaks wrapping paragraph text into separate columns. */}
+        <label
+          htmlFor="termsAccepted"
+          className="block text-sm leading-relaxed font-normal text-muted-foreground select-none"
+        >
           Li e aceito os{" "}
           <TermsDialog
             trigger={
-              <button type="button" className="underline underline-offset-2 hover:text-foreground">
+              <button
+                type="button"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
                 Termos de Uso e Contrato de Prestação de Serviço
               </button>
             }
           />
-          , incluindo a vigência de 12 meses e a exclusão dos dados ao final do prazo sem renovação.
-        </Label>
+          , incluindo a vigência de 12 meses e a exclusão dos dados ao final do prazo sem
+          renovação.
+        </label>
       </div>
 
       {state.error && <p className="text-sm text-destructive">{state.error}</p>}
