@@ -67,9 +67,22 @@ model Account {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  siteSettings  SiteSettings?
-  events        Event[]
-  guestMessages GuestMessage[]
+  /// 12 months from creation (or from the latest renewal payment). Null means this
+  /// account predates the 12-month contract feature and isn't subject to it - only
+  /// accounts created through the paid /comecar flow (or later renewed) get a value.
+  expiresAt               DateTime?
+  /// When the owner accepted the Terms of Use / contract, and which version.
+  termsAcceptedAt         DateTime?
+  termsVersion            String?
+  /// Set once the "expires in ~2 months" / "~1 month" reminder emails go out, so the
+  /// cron job never sends either one twice. Cleared on every renewal.
+  reminderTwoMonthsSentAt DateTime?
+  reminderOneMonthSentAt  DateTime?
+
+  siteSettings         SiteSettings?
+  events               Event[]
+  guestMessages        GuestMessage[]
+  registrationPayments RegistrationPayment[]
 
   @@map("accounts")
 }
@@ -181,22 +194,29 @@ model Payment {
   @@map("payments")
 }
 
-/// A one-time payment required to unlock account creation - the couple pays before
-/// they ever get a Supabase Auth user or an Account. Card-only, goes to the
-/// platform owner's Mercado Pago account (this is platform revenue, not a gift).
+/// A one-time payment required to unlock account creation, OR (when accountId is set)
+/// a renewal payment that extends an existing account by another 12 months. Card-only,
+/// goes to the platform owner's Mercado Pago account (this is platform revenue, not a gift).
 model RegistrationPayment {
-  id             String        @id @default(uuid())
-  email          String
-  status         PaymentStatus @default(PENDING)
-  mpPreferenceId String?
-  mpPaymentId    String?       @unique
-  amount         Decimal       @db.Decimal(10, 2)
-  /// Set once this payment has been consumed to create an Account, so it can't be reused.
-  usedAt         DateTime?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id              String        @id @default(uuid())
+  email           String
+  status          PaymentStatus @default(PENDING)
+  mpPreferenceId  String?
+  mpPaymentId     String?       @unique
+  amount          Decimal       @db.Decimal(10, 2)
+  /// Null = new-signup payment. Set = renewal payment for an already-existing account.
+  accountId       String?
+  account         Account?      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// Recorded at checkout time, before redirecting to Mercado Pago.
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+  /// Set once this payment has been consumed (account created, or expiresAt extended).
+  usedAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@index([email])
+  @@index([accountId])
   @@map("registration_payments")
 }
 

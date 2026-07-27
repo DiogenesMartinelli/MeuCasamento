@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
+import { addMonths } from "date-fns";
 import { Payment as MPPayment } from "mercadopago";
 import { prisma } from "@/lib/prisma";
 import { mercadopago } from "@/lib/mercadopago";
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
 
   const registrationPayment = await prisma.registrationPayment.findUnique({
     where: { id: externalReference },
+    include: { account: true },
   });
 
   if (registrationPayment) {
@@ -104,6 +106,31 @@ export async function POST(request: NextRequest) {
       where: { id: registrationPayment.id },
       data: { status: newStatus, mpPaymentId: String(mpPayment.id) },
     });
+
+    // Renewal payments (accountId set) push the 12-month expiry forward as soon as
+    // they're approved - unlike new signups, there's no separate "complete" step since
+    // the Supabase user and Account already exist.
+    if (newStatus === "APPROVED" && registrationPayment.account && !registrationPayment.usedAt) {
+      const base =
+        registrationPayment.account.expiresAt && registrationPayment.account.expiresAt > new Date()
+          ? registrationPayment.account.expiresAt
+          : new Date();
+
+      await prisma.$transaction([
+        prisma.account.update({
+          where: { id: registrationPayment.account.id },
+          data: {
+            expiresAt: addMonths(base, 12),
+            reminderTwoMonthsSentAt: null,
+            reminderOneMonthSentAt: null,
+          },
+        }),
+        prisma.registrationPayment.update({
+          where: { id: registrationPayment.id },
+          data: { usedAt: new Date() },
+        }),
+      ]);
+    }
   }
 
   return NextResponse.json({ received: true });
