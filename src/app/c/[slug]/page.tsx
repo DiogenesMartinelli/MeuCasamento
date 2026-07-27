@@ -31,9 +31,11 @@ export default async function WeddingSitePage({ params }: PageProps) {
   const colors: SiteColors = {
     accentColor: settings?.accentColor,
     backgroundColor: settings?.backgroundColor,
+    backgroundGradientTo: settings?.backgroundGradientTo,
     textColor: settings?.textColor,
     mutedTextColor: settings?.mutedTextColor,
     cardBackgroundColor: settings?.cardBackgroundColor,
+    cardBackgroundGradientTo: settings?.cardBackgroundGradientTo,
     borderColor: settings?.borderColor,
   };
 
@@ -45,6 +47,7 @@ export default async function WeddingSitePage({ params }: PageProps) {
         backgroundImageUrl={settings?.backgroundImageUrl}
         profileImageUrl={settings?.profileImageUrl}
         template={template}
+        colors={colors}
       />
 
       <EventsBanner
@@ -56,7 +59,7 @@ export default async function WeddingSitePage({ params }: PageProps) {
 
       <section
         className={`px-6 py-16 text-center ${template.sectionBg}`}
-        style={getSectionStyle(settings?.backgroundColor, settings?.textColor)}
+        style={getSectionStyle(settings?.backgroundColor, settings?.textColor, settings?.backgroundGradientTo)}
       >
         <div className="mx-auto max-w-3xl">
           <h2 className={`text-3xl font-semibold ${template.headingFont}`} style={getTextStyle(settings?.textColor)}>

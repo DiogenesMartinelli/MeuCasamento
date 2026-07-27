@@ -23,16 +23,22 @@ export default async function RsvpPage({ params }: PageProps) {
   const colors: SiteColors = {
     accentColor: account.siteSettings?.accentColor,
     backgroundColor: account.siteSettings?.backgroundColor,
+    backgroundGradientTo: account.siteSettings?.backgroundGradientTo,
     textColor: account.siteSettings?.textColor,
     mutedTextColor: account.siteSettings?.mutedTextColor,
     cardBackgroundColor: account.siteSettings?.cardBackgroundColor,
+    cardBackgroundGradientTo: account.siteSettings?.cardBackgroundGradientTo,
     borderColor: account.siteSettings?.borderColor,
   };
 
   return (
     <main
       className={`mx-auto flex min-h-screen w-full flex-col items-center justify-center gap-8 px-6 py-16 ${template.sectionBg}`}
-      style={getSectionStyle(account.siteSettings?.backgroundColor, account.siteSettings?.textColor)}
+      style={getSectionStyle(
+        account.siteSettings?.backgroundColor,
+        account.siteSettings?.textColor,
+        account.siteSettings?.backgroundGradientTo,
+      )}
     >
       <RsvpFlow
         familyToken={familyToken}

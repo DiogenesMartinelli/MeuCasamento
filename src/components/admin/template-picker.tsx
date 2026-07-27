@@ -35,10 +35,14 @@ export function TemplatePicker({
                 active ? "border-primary ring-2 ring-primary/30" : "border-border",
               )}
             >
-              <div className="flex h-10 overflow-hidden rounded-md">
-                {template.swatch.map((color, i) => (
-                  <span key={i} className="flex-1" style={{ backgroundColor: color }} />
-                ))}
+              <div
+                className="flex h-10 overflow-hidden rounded-md"
+                style={template.swatchGradient ? { backgroundImage: template.swatchGradient } : undefined}
+              >
+                {!template.swatchGradient &&
+                  template.swatch.map((color, i) => (
+                    <span key={i} className="flex-1" style={{ backgroundColor: color }} />
+                  ))}
               </div>
               <div>
                 <p className="text-sm font-medium">{template.label}</p>

@@ -45,6 +45,8 @@ enum SiteTemplate {
   BOHO
   MINIMAL
   ROMANTIC
+  SUNSET
+  AURORA
   CUSTOM
 }
 
@@ -88,31 +90,36 @@ model Account {
 }
 
 model SiteSettings {
-  id                  String        @id @default(uuid())
-  accountId           String        @unique
-  account             Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  coupleName          String        @default("")
-  welcomeMessage      String        @default("")
-  backgroundImageUrl  String?
-  bannerImageUrl      String?
-  profileImageUrl     String?
-  template            SiteTemplate  @default(CLASSIC)
+  id                       String        @id @default(uuid())
+  accountId                String        @unique
+  account                  Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  coupleName               String        @default("")
+  welcomeMessage           String        @default("")
+  backgroundImageUrl       String?
+  bannerImageUrl           String?
+  profileImageUrl          String?
+  template                 SiteTemplate  @default(CLASSIC)
   /// Shown to a guest after they choose "não poderei comparecer" on the RSVP page.
-  declineMessage      String        @default("Que pena! Sentiremos sua falta, mas agradecemos por avisar. 💛")
+  declineMessage           String        @default("Que pena! Sentiremos sua falta, mas agradecemos por avisar. 💛")
   /// Optional hex colors overriding the template's defaults. Any left unset falls
   /// back to the chosen template's own palette. The CUSTOM template exposes all
   /// six in the admin UI; other templates only expose the first three.
-  accentColor         String?
-  backgroundColor     String?
-  textColor           String?
-  mutedTextColor      String?
-  cardBackgroundColor String?
-  borderColor         String?
-  giftCardShape       GiftCardShape @default(ROUNDED)
+  accentColor              String?
+  backgroundColor          String?
+  /// When set alongside backgroundColor, the background renders as a gradient
+  /// between the two instead of a flat color.
+  backgroundGradientTo     String?
+  textColor                String?
+  mutedTextColor           String?
+  cardBackgroundColor      String?
+  /// Same idea as backgroundGradientTo, but for gift/message card backgrounds.
+  cardBackgroundGradientTo String?
+  borderColor              String?
+  giftCardShape            GiftCardShape @default(ROUNDED)
   /// When true, the RSVP flow asks "quer presentear o casal?" before showing the
   /// gift list. When false, it goes straight from the thank-you message to the list.
-  askGiftIntent       Boolean       @default(true)
-  updatedAt           DateTime      @updatedAt
+  askGiftIntent            Boolean       @default(true)
+  updatedAt                DateTime      @updatedAt
 
   @@map("site_settings")
 }

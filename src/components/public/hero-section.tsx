@@ -1,5 +1,7 @@
 import Image from "next/image";
 import type { SiteTemplateConfig } from "@/lib/site-templates";
+import { getHeroFallbackStyle } from "@/lib/accent-color";
+import type { SiteColors } from "@/lib/accent-color";
 import { cn } from "@/lib/utils";
 
 type HeroSectionProps = {
@@ -8,6 +10,7 @@ type HeroSectionProps = {
   backgroundImageUrl?: string | null;
   profileImageUrl?: string | null;
   template: SiteTemplateConfig;
+  colors?: SiteColors;
 };
 
 export function HeroSection({
@@ -16,6 +19,7 @@ export function HeroSection({
   backgroundImageUrl,
   profileImageUrl,
   template,
+  colors,
 }: HeroSectionProps) {
   const squarePhoto = template.id === "MODERN" || template.id === "MINIMAL";
 
@@ -31,7 +35,10 @@ export function HeroSection({
           sizes="100vw"
         />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-neutral-800 to-neutral-950" />
+        <div
+          className="absolute inset-0"
+          style={getHeroFallbackStyle(colors?.backgroundColor, colors?.backgroundGradientTo)}
+        />
       )}
       <div className={cn("absolute inset-0", template.heroOverlay)} />
 

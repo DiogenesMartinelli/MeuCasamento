@@ -5,9 +5,13 @@ import type { GiftCardShape } from "@/generated/prisma/client";
 export type SiteColors = {
   accentColor?: string | null;
   backgroundColor?: string | null;
+  /** When set alongside backgroundColor, renders a gradient instead of a flat color. */
+  backgroundGradientTo?: string | null;
   textColor?: string | null;
   mutedTextColor?: string | null;
   cardBackgroundColor?: string | null;
+  /** Same idea as backgroundGradientTo, but for card surfaces. */
+  cardBackgroundGradientTo?: string | null;
   borderColor?: string | null;
 };
 
@@ -22,6 +26,15 @@ function pickTextColor(hex: string): string {
   return luminance > 0.6 ? "#171717" : "#ffffff";
 }
 
+/** A flat color, or (when a second stop is given) a diagonal gradient between the two. */
+function backgroundFill(color?: string | null, gradientTo?: string | null): CSSProperties {
+  if (color && gradientTo) {
+    return { backgroundImage: `linear-gradient(135deg, ${color}, ${gradientTo})` };
+  }
+  if (color) return { backgroundColor: color };
+  return {};
+}
+
 /** Inline style overriding a filled button's color with the couple's custom accent, if set. */
 export function getAccentButtonStyle(accentColor?: string | null): CSSProperties | undefined {
   if (!accentColor) return undefined;
@@ -32,16 +45,32 @@ export function getAccentButtonStyle(accentColor?: string | null): CSSProperties
   };
 }
 
-/** Inline style overriding a section's background (and readable text color), if set. */
+/** Inline style overriding a section's background (flat or gradient) and readable text color. */
 export function getSectionStyle(
   backgroundColor?: string | null,
   textColor?: string | null,
+  backgroundGradientTo?: string | null,
 ): CSSProperties | undefined {
   if (!backgroundColor && !textColor) return undefined;
   return {
-    ...(backgroundColor ? { backgroundColor } : {}),
+    ...backgroundFill(backgroundColor, backgroundGradientTo),
     ...(textColor ? { color: textColor } : { color: backgroundColor ? pickTextColor(backgroundColor) : undefined }),
   };
+}
+
+/**
+ * Inline style for the hero area behind the couple's name (and their photo, if uploaded).
+ * Only used when there's no background photo - falls back to a neutral dark gradient so
+ * the white hero text stays readable when the couple hasn't set a custom color either.
+ */
+export function getHeroFallbackStyle(
+  backgroundColor?: string | null,
+  backgroundGradientTo?: string | null,
+): CSSProperties {
+  if (backgroundColor || backgroundGradientTo) {
+    return backgroundFill(backgroundColor, backgroundGradientTo ?? backgroundColor);
+  }
+  return { backgroundImage: "linear-gradient(to bottom, #262626, #0a0a0a)" };
 }
 
 /** Inline style overriding text/heading color, if set. */
@@ -56,14 +85,15 @@ export function getMutedTextStyle(mutedTextColor?: string | null): CSSProperties
   return { color: mutedTextColor };
 }
 
-/** Inline style overriding a card/surface's background and border color, if set. */
+/** Inline style overriding a card/surface's background (flat or gradient) and border color. */
 export function getCardStyle(
   cardBackgroundColor?: string | null,
   borderColor?: string | null,
+  cardBackgroundGradientTo?: string | null,
 ): CSSProperties | undefined {
   if (!cardBackgroundColor && !borderColor) return undefined;
   return {
-    ...(cardBackgroundColor ? { backgroundColor: cardBackgroundColor } : {}),
+    ...backgroundFill(cardBackgroundColor, cardBackgroundGradientTo),
     ...(borderColor ? { borderColor } : {}),
   };
 }

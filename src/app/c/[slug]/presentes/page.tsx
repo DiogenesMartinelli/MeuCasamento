@@ -25,16 +25,22 @@ export default async function GiftsPage({ params }: PageProps) {
   const colors: SiteColors = {
     accentColor: account.siteSettings?.accentColor,
     backgroundColor: account.siteSettings?.backgroundColor,
+    backgroundGradientTo: account.siteSettings?.backgroundGradientTo,
     textColor: account.siteSettings?.textColor,
     mutedTextColor: account.siteSettings?.mutedTextColor,
     cardBackgroundColor: account.siteSettings?.cardBackgroundColor,
+    cardBackgroundGradientTo: account.siteSettings?.cardBackgroundGradientTo,
     borderColor: account.siteSettings?.borderColor,
   };
 
   return (
     <main
       className={`px-6 py-16 ${template.sectionBg}`}
-      style={getSectionStyle(account.siteSettings?.backgroundColor, account.siteSettings?.textColor)}
+      style={getSectionStyle(
+        account.siteSettings?.backgroundColor,
+        account.siteSettings?.textColor,
+        account.siteSettings?.backgroundGradientTo,
+      )}
     >
       <div className="mx-auto max-w-6xl">
         <h1

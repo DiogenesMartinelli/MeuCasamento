@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import {
   getAccentButtonStyle,
   getCardStyle,
+  getHeroFallbackStyle,
   getMutedTextStyle,
   getSectionStyle,
   getTextStyle,
@@ -100,7 +101,10 @@ function SitePreviewHome({
         {backgroundImageUrl ? (
           <Image src={backgroundImageUrl} alt="" fill className="object-cover" unoptimized />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-b from-neutral-800 to-neutral-950" />
+          <div
+            className="absolute inset-0"
+            style={getHeroFallbackStyle(colors.backgroundColor, colors.backgroundGradientTo)}
+          />
         )}
         <div className={cn("absolute inset-0", template.heroOverlay)} />
         <div className="relative z-10 flex flex-col items-center gap-2 px-4">
@@ -119,7 +123,7 @@ function SitePreviewHome({
 
       <div
         className={cn("px-4 py-8 text-center", template.sectionBg)}
-        style={getSectionStyle(colors.backgroundColor, colors.textColor)}
+        style={getSectionStyle(colors.backgroundColor, colors.textColor, colors.backgroundGradientTo)}
       >
         <h2 className={cn("text-lg font-semibold", template.headingFont)} style={getTextStyle(colors.textColor)}>
           Lista de Presentes
@@ -140,7 +144,7 @@ function SitePreviewHome({
             <div
               key={gift.id}
               className={cn("overflow-hidden rounded-lg border text-left", template.cardClass)}
-              style={getCardStyle(colors.cardBackgroundColor, colors.borderColor)}
+              style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo)}
             >
               <div className={cn("h-16 w-full bg-muted", shapeClass.image)} />
               <div className="p-2">
@@ -183,7 +187,7 @@ function RsvpPreview({
   return (
     <div
       className="flex min-h-[420px] flex-col items-center justify-center gap-6 px-6 py-10 text-center"
-      style={getSectionStyle(colors.backgroundColor, colors.textColor)}
+      style={getSectionStyle(colors.backgroundColor, colors.textColor, colors.backgroundGradientTo)}
     >
       {step === "respond" && (
         <>
@@ -195,7 +199,7 @@ function RsvpPreview({
           </div>
           <div
             className={cn("w-full max-w-[220px] rounded-lg border px-3 py-2 text-xs", template.cardClass)}
-            style={getCardStyle(colors.cardBackgroundColor, colors.borderColor)}
+            style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo)}
           >
             Convidado Exemplo
           </div>
@@ -289,7 +293,7 @@ function RsvpPreview({
               <div
                 key={gift.id}
                 className={cn("overflow-hidden rounded-lg border text-left", template.cardClass)}
-                style={getCardStyle(colors.cardBackgroundColor, colors.borderColor)}
+                style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo)}
               >
                 <div className={cn("h-16 w-full bg-muted", shapeClass.image)} />
                 <div className="p-2">

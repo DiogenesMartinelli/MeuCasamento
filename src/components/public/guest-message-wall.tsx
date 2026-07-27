@@ -23,7 +23,11 @@ export function GuestMessageWall({
     );
   }
 
-  const cardStyle = getCardStyle(colors?.cardBackgroundColor, colors?.borderColor);
+  const cardStyle = getCardStyle(
+    colors?.cardBackgroundColor,
+    colors?.borderColor,
+    colors?.cardBackgroundGradientTo,
+  );
 
   return (
     <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 [&>*]:mb-4">

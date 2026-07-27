@@ -27,7 +27,11 @@ export function GiftCard({
   const purchased = gift.status === "PURCHASED";
   const shapeClass = GIFT_CARD_SHAPE_CLASS[shape];
   const accentStyle = purchased ? undefined : getAccentButtonStyle(colors?.accentColor);
-  const cardStyle = getCardStyle(colors?.cardBackgroundColor, colors?.borderColor);
+  const cardStyle = getCardStyle(
+    colors?.cardBackgroundColor,
+    colors?.borderColor,
+    colors?.cardBackgroundGradientTo,
+  );
   const mutedStyle = getMutedTextStyle(colors?.mutedTextColor);
 
   return (

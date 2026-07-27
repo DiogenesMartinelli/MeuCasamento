@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { TemplatePicker } from "@/components/admin/template-picker";
 import { ShapePicker } from "@/components/admin/shape-picker";
 import { ColorPickerField } from "@/components/admin/color-picker-field";
+import { GradientColorField } from "@/components/admin/gradient-color-field";
 import { SitePreview } from "@/components/admin/site-preview";
 import { cn } from "@/lib/utils";
 import type { SiteColors } from "@/lib/accent-color";
@@ -29,9 +30,11 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
   const [colors, setColors] = useState<SiteColors>({
     accentColor: settings?.accentColor,
     backgroundColor: settings?.backgroundColor,
+    backgroundGradientTo: settings?.backgroundGradientTo,
     textColor: settings?.textColor,
     mutedTextColor: settings?.mutedTextColor,
     cardBackgroundColor: settings?.cardBackgroundColor,
+    cardBackgroundGradientTo: settings?.cardBackgroundGradientTo,
     borderColor: settings?.borderColor,
   });
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(settings?.backgroundImageUrl ?? null);
@@ -40,6 +43,14 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
 
   function updateColor(key: keyof SiteColors) {
     return (value: string) => setColors((prev) => ({ ...prev, [key]: value || null }));
+  }
+
+  // Switching templates without clearing leftover custom colors used to leave the old
+  // template's overrides silently in effect (inline styles always beat the new
+  // template's own classes), which read as "picking a template does nothing".
+  function handleTemplateChange(next: SiteTemplate) {
+    setTemplate(next);
+    setColors({});
   }
 
   return (
@@ -69,7 +80,7 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
 
         <div className="flex flex-col gap-1.5">
           <Label>Estilo do site</Label>
-          <TemplatePicker defaultValue={settings?.template ?? "CLASSIC"} onChange={setTemplate} />
+          <TemplatePicker defaultValue={settings?.template ?? "CLASSIC"} onChange={handleTemplateChange} />
           {isCustom && (
             <p className="text-xs text-muted-foreground">
               Estilo &quot;Outro&quot; selecionado: você pode definir todas as cores do site abaixo.
@@ -81,29 +92,38 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
           <div className="flex flex-col gap-1.5">
             <Label>Cor de destaque</Label>
             <ColorPickerField
+              key={`accent-${template}`}
               name="accentColor"
               ariaLabel="Escolher cor de destaque"
-              defaultValue={settings?.accentColor}
+              defaultValue={colors.accentColor}
               onChange={updateColor("accentColor")}
             />
             <p className="text-xs text-muted-foreground">Cor dos botões principais.</p>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>Cor de fundo</Label>
-            <ColorPickerField
+            <GradientColorField
+              key={`background-${template}`}
               name="backgroundColor"
+              gradientName="backgroundGradientTo"
               ariaLabel="Escolher cor de fundo"
-              defaultValue={settings?.backgroundColor}
+              defaultValue={colors.backgroundColor}
+              defaultGradientValue={colors.backgroundGradientTo}
               onChange={updateColor("backgroundColor")}
+              onGradientChange={updateColor("backgroundGradientTo")}
             />
-            <p className="text-xs text-muted-foreground">Fundo das seções do site.</p>
+            <p className="text-xs text-muted-foreground">
+              Fundo das seções do site. Também usado atrás do nome do casal quando não há
+              imagem de fundo enviada.
+            </p>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>Cor do texto</Label>
             <ColorPickerField
+              key={`text-${template}`}
               name="textColor"
               ariaLabel="Escolher cor do texto"
-              defaultValue={settings?.textColor}
+              defaultValue={colors.textColor}
               onChange={updateColor("textColor")}
             />
             <p className="text-xs text-muted-foreground">Cor dos títulos e textos.</p>
@@ -119,29 +139,35 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
           <div className="flex flex-col gap-1.5">
             <Label>Cor do texto secundário</Label>
             <ColorPickerField
+              key={`muted-${template}`}
               name="mutedTextColor"
               ariaLabel="Escolher cor do texto secundário"
-              defaultValue={settings?.mutedTextColor}
+              defaultValue={colors.mutedTextColor}
               onChange={updateColor("mutedTextColor")}
             />
             <p className="text-xs text-muted-foreground">Descrições, legendas e datas.</p>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>Cor dos cards</Label>
-            <ColorPickerField
+            <GradientColorField
+              key={`card-${template}`}
               name="cardBackgroundColor"
+              gradientName="cardBackgroundGradientTo"
               ariaLabel="Escolher cor de fundo dos cards"
-              defaultValue={settings?.cardBackgroundColor}
+              defaultValue={colors.cardBackgroundColor}
+              defaultGradientValue={colors.cardBackgroundGradientTo}
               onChange={updateColor("cardBackgroundColor")}
+              onGradientChange={updateColor("cardBackgroundGradientTo")}
             />
             <p className="text-xs text-muted-foreground">Fundo dos cards de presente e recados.</p>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>Cor das bordas</Label>
             <ColorPickerField
+              key={`border-${template}`}
               name="borderColor"
               ariaLabel="Escolher cor das bordas"
-              defaultValue={settings?.borderColor}
+              defaultValue={colors.borderColor}
               onChange={updateColor("borderColor")}
             />
             <p className="text-xs text-muted-foreground">Bordas dos cards e listas.</p>

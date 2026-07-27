@@ -6,6 +6,8 @@ export type SiteTemplateConfig = {
   description: string;
   /** Small color swatches shown in the admin picker, light → dark. */
   swatch: [string, string, string];
+  /** When set, the picker renders this CSS gradient instead of the 3 flat swatch bars. */
+  swatchGradient?: string;
   headingFont: string;
   /** Optional decorative glyph rendered under the couple's name. */
   ornament: string;
@@ -93,6 +95,34 @@ export const SITE_TEMPLATES: SiteTemplateConfig[] = [
     accentText: "text-rose-200",
     sectionBg: "bg-rose-50/60",
     cardClass: "border-rose-100 bg-white rounded-2xl",
+    buttonRadius: "rounded-full",
+  },
+  {
+    id: "SUNSET",
+    label: "Degradê Pôr do Sol",
+    description: "Gradiente quente de dourado a rosa profundo. Caloroso e vibrante.",
+    swatch: ["#fde68a", "#fb923c", "#be185d"],
+    swatchGradient: "linear-gradient(135deg, #fde68a, #fb923c, #be185d)",
+    headingFont: "font-playfair",
+    ornament: "☀",
+    heroOverlay: "bg-gradient-to-t from-orange-950/75 via-pink-900/35 to-transparent",
+    accentText: "text-orange-200",
+    sectionBg: "bg-gradient-to-br from-orange-50 via-rose-50 to-amber-50",
+    cardClass: "border-orange-200 bg-white/90",
+    buttonRadius: "rounded-full",
+  },
+  {
+    id: "AURORA",
+    label: "Degradê Aurora",
+    description: "Gradiente frio de ciano a violeta profundo. Noturno e etéreo.",
+    swatch: ["#a5f3fc", "#818cf8", "#4c1d95"],
+    swatchGradient: "linear-gradient(135deg, #a5f3fc, #818cf8, #4c1d95)",
+    headingFont: "font-sans font-semibold tracking-tight",
+    ornament: "✧",
+    heroOverlay: "bg-gradient-to-t from-indigo-950/80 via-violet-900/40 to-transparent",
+    accentText: "text-indigo-200",
+    sectionBg: "bg-gradient-to-br from-indigo-50 via-sky-50 to-violet-50",
+    cardClass: "border-indigo-200 bg-white/90",
     buttonRadius: "rounded-full",
   },
   {
