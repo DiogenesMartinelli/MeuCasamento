@@ -11,10 +11,11 @@ type PageProps = { params: Promise<{ slug: string; familyToken: string }> };
 
 export default async function RsvpPage({ params }: PageProps) {
   const { slug, familyToken } = await params;
-  const account = await getAccountBySlug(slug);
+  // getGuestFamily only depends on familyToken, not on the account lookup, so it
+  // doesn't need to wait behind it.
+  const [account, guests] = await Promise.all([getAccountBySlug(slug), getGuestFamily(familyToken)]);
   if (!account) notFound();
 
-  const guests = await getGuestFamily(familyToken);
   const familyGuests = guests.filter((guest) => guest.event.accountId === account.id);
   if (familyGuests.length === 0) notFound();
 

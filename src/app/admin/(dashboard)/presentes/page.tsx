@@ -14,15 +14,14 @@ const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "
 
 export default async function GiftsAdminPage() {
   const account = await getCurrentAccount();
-  const events = await prisma.event.findMany({
-    where: { accountId: account!.id },
-    orderBy: { date: "asc" },
-  });
-  const rawGifts = await prisma.gift.findMany({
-    where: { accountId: account!.id },
-    include: { event: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const [events, rawGifts] = await Promise.all([
+    prisma.event.findMany({ where: { accountId: account!.id }, orderBy: { date: "asc" } }),
+    prisma.gift.findMany({
+      where: { accountId: account!.id },
+      include: { event: true },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
   const gifts = rawGifts.map((gift) => ({ ...gift, price: gift.price === null ? null : Number(gift.price) }));
 
   return (

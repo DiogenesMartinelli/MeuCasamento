@@ -8,11 +8,10 @@ import { Button } from "@/components/ui/button";
 
 export default async function GuestsPage() {
   const account = await getCurrentAccount();
-  const events = await prisma.event.findMany({
-    where: { accountId: account!.id },
-    orderBy: { date: "asc" },
-  });
-  const families = await getGuestFamilies(account!.id);
+  const [events, families] = await Promise.all([
+    prisma.event.findMany({ where: { accountId: account!.id }, orderBy: { date: "asc" } }),
+    getGuestFamilies(account!.id),
+  ]);
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
 
   const familyOptions = families.map((family) => ({ token: family.familyToken, label: family.label }));
