@@ -148,7 +148,7 @@ export function RsvpFlow({
           <div
             key={step}
             className={cn(
-              "flex flex-col items-center gap-8 text-center motion-safe:animate-rsvp-step-in",
+              "flex flex-col items-center gap-8 text-center animate-rsvp-step-in",
               hasFrame && "rounded-2xl p-8 sm:p-10",
             )}
             style={frameStyle}

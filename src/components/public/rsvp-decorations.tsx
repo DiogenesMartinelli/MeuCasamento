@@ -18,14 +18,34 @@ function scatter(index: number, count: number, seedA: number, seedB: number) {
   };
 }
 
-export function StringLights({ count = 14 }: { count?: number }) {
+/** A wire dipping in gentle swags between anchor points - deterministic (pure fn of i). */
+function bulbY(i: number) {
+  return 18 + Math.sin(i * 0.9) * 10;
+}
+
+export function StringLights({ count = 26 }: { count?: number }) {
+  const points = Array.from({ length: count }, (_, i) => ({
+    x: (i / (count - 1)) * 100,
+    y: bulbY(i),
+  }));
+  const wirePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex h-10 justify-between px-4 sm:px-10" aria-hidden>
-      {Array.from({ length: count }).map((_, i) => (
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-12 overflow-visible" aria-hidden>
+      <svg viewBox="0 0 100 48" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+        <path
+          d={wirePath}
+          fill="none"
+          stroke="rgba(87, 62, 24, 0.55)"
+          strokeWidth="1.5"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      {points.map((p, i) => (
         <span
           key={i}
-          className="mt-1 size-2.5 rounded-full bg-amber-200 shadow-[0_0_6px_2px_rgba(252,211,77,0.7)] motion-safe:animate-rsvp-bulb"
-          style={{ animationDelay: `${(i % 6) * 0.28}s` }}
+          className="absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-200 shadow-[0_0_8px_3px_rgba(252,211,77,0.75)] animate-rsvp-bulb"
+          style={{ left: `${p.x}%`, top: `${p.y}px`, animationDelay: `${(i % 6) * 0.28}s` }}
         />
       ))}
     </div>
@@ -41,7 +61,7 @@ export function Sparkles({ count = 18 }: { count?: number }) {
         return (
           <span
             key={i}
-            className="absolute size-1 rounded-full bg-white motion-safe:animate-rsvp-sparkle"
+            className="absolute size-1 rounded-full bg-white animate-rsvp-sparkle"
             style={{
               left: `${left * 100}%`,
               top: `${top * 100}%`,
@@ -78,7 +98,7 @@ export function AnimatedBackground({ preset }: { preset: RsvpAnimatedBackground 
             <span
               key={i}
               className={cn(
-                "absolute -top-6 size-2.5 rounded-[60%_0] motion-safe:animate-rsvp-fall",
+                "absolute -top-6 size-2.5 rounded-[60%_0] animate-rsvp-fall",
                 PETAL_COLORS[i % PETAL_COLORS.length],
               )}
               style={{ left: `${left * 100}%`, animationDelay: `${delay * duration}s`, animationDuration: `${duration}s` }}
@@ -90,7 +110,7 @@ export function AnimatedBackground({ preset }: { preset: RsvpAnimatedBackground 
             <span
               key={i}
               className={cn(
-                "absolute -top-4 rounded-full bg-white/80 motion-safe:animate-rsvp-fall-straight",
+                "absolute -top-4 rounded-full bg-white/80 animate-rsvp-fall-straight",
                 SNOW_SIZES[i % SNOW_SIZES.length],
               )}
               style={{ left: `${left * 100}%`, animationDelay: `${delay * duration}s`, animationDuration: `${duration}s` }}
@@ -102,7 +122,7 @@ export function AnimatedBackground({ preset }: { preset: RsvpAnimatedBackground 
             <span
               key={i}
               className={cn(
-                "absolute size-1.5 rounded-full shadow-[0_0_8px_3px_rgba(190,242,100,0.6)] motion-safe:animate-rsvp-drift",
+                "absolute size-1.5 rounded-full shadow-[0_0_8px_3px_rgba(190,242,100,0.6)] animate-rsvp-drift",
                 FIREFLY_COLOR,
               )}
               style={{
@@ -118,7 +138,7 @@ export function AnimatedBackground({ preset }: { preset: RsvpAnimatedBackground 
         return (
           <span
             key={i}
-            className="absolute size-[3px] rounded-full bg-white motion-safe:animate-rsvp-sparkle"
+            className="absolute size-[3px] rounded-full bg-white animate-rsvp-sparkle"
             style={{
               left: `${left * 100}%`,
               top: `${((i * 31 + 9) % 91) / 91 * 100}%`,
@@ -137,7 +157,7 @@ export function LightingOverlay({ effect }: { effect: RsvpLightingEffect }) {
   if (effect === "GLOW") {
     return (
       <div
-        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.35),transparent_60%)] motion-safe:animate-rsvp-glow"
+        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.35),transparent_60%)] animate-rsvp-glow"
         aria-hidden
       />
     );
@@ -145,7 +165,7 @@ export function LightingOverlay({ effect }: { effect: RsvpLightingEffect }) {
   if (effect === "SPOTLIGHT") {
     return (
       <div
-        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_260px_420px_at_50%_-10%,rgba(255,255,255,0.45),transparent_65%)] motion-safe:animate-rsvp-spotlight"
+        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_260px_420px_at_50%_-10%,rgba(255,255,255,0.45),transparent_65%)] animate-rsvp-spotlight"
         aria-hidden
       />
     );
@@ -153,7 +173,7 @@ export function LightingOverlay({ effect }: { effect: RsvpLightingEffect }) {
   // CANDLELIGHT
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_60%,rgba(251,191,36,0.4),transparent_55%)] motion-safe:animate-rsvp-flicker"
+      className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_60%,rgba(251,191,36,0.4),transparent_55%)] animate-rsvp-flicker"
       aria-hidden
     />
   );
@@ -185,7 +205,7 @@ export function ConfirmBurst({ variant, active }: { variant: RsvpConfirmAnimatio
             <span
               key={i}
               className={cn(
-                "absolute size-2 motion-safe:animate-rsvp-burst",
+                "absolute size-2 animate-rsvp-burst",
                 CONFETTI_COLORS[i % CONFETTI_COLORS.length],
               )}
               style={style}
@@ -194,7 +214,7 @@ export function ConfirmBurst({ variant, active }: { variant: RsvpConfirmAnimatio
         }
         if (variant === "HEARTS") {
           return (
-            <span key={i} className="absolute text-lg text-rose-500 motion-safe:animate-rsvp-burst" style={style}>
+            <span key={i} className="absolute text-lg text-rose-500 animate-rsvp-burst" style={style}>
               ♥
             </span>
           );
@@ -203,7 +223,7 @@ export function ConfirmBurst({ variant, active }: { variant: RsvpConfirmAnimatio
         return (
           <span
             key={i}
-            className="absolute size-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_2px_rgba(252,211,77,0.8)] motion-safe:animate-rsvp-burst"
+            className="absolute size-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_2px_rgba(252,211,77,0.8)] animate-rsvp-burst"
             style={style}
           />
         );

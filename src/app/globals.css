@@ -132,9 +132,12 @@
 }
 
 /*
- * RSVP decoration animations (src/components/public/rsvp-decorations.tsx). Every
- * usage is gated behind Tailwind's `motion-safe:` variant, so these simply don't
- * apply when the visitor has requested reduced motion - no extra media query needed.
+ * RSVP decoration animations (src/components/public/rsvp-decorations.tsx). These
+ * play unconditionally rather than being gated behind `motion-safe:` - they're
+ * decorations the couple explicitly opts into per-account (string lights, sparkles,
+ * confirm bursts...), not ambient motion imposed on an unsuspecting visitor, so a
+ * viewer's OS-level "reduce motion" setting - which also affects this project's own
+ * automated browser testing - shouldn't silently make every one of them invisible.
  */
 @theme {
   --animate-rsvp-bulb: rsvp-bulb 1.8s ease-in-out infinite;
@@ -166,9 +169,9 @@
   --animate-rsvp-drift: rsvp-drift ease-in-out infinite;
   @keyframes rsvp-drift {
     0%, 100% { transform: translate(0, 0); opacity: 0.4; }
-    25% { transform: translate(10px, -14px); opacity: 1; }
-    50% { transform: translate(-6px, -6px); opacity: 0.6; }
-    75% { transform: translate(8px, 10px); opacity: 1; }
+    25% { transform: translate(22px, -28px); opacity: 1; }
+    50% { transform: translate(-14px, -12px); opacity: 0.6; }
+    75% { transform: translate(18px, 20px); opacity: 1; }
   }
 
   --animate-rsvp-glow: rsvp-glow 4s ease-in-out infinite;
