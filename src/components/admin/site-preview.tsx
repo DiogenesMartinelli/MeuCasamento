@@ -29,6 +29,7 @@ export type SitePreviewProps = {
   welcomeMessage: string;
   declineMessage: string;
   giftCardShape: GiftCardShape;
+  askGiftIntent: boolean;
   backgroundImageUrl?: string | null;
   profileImageUrl?: string | null;
 };
@@ -175,9 +176,11 @@ function RsvpPreview({
   coupleName,
   declineMessage,
   giftCardShape,
+  askGiftIntent,
 }: SitePreviewProps & { templateConfig: SiteTemplateConfig }) {
   const [step, setStep] = useState<RsvpStep>("respond");
   const [status, setStatus] = useState<"CONFIRMED" | "DECLINED">("CONFIRMED");
+  const [wantsGifts, setWantsGifts] = useState<boolean | null>(null);
   const accentStyle = getAccentButtonStyle(colors.accentColor);
   const mutedStyle = getMutedTextStyle(colors.mutedTextColor);
   const cardStyle = getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards);
@@ -269,26 +272,71 @@ function RsvpPreview({
           </div>
 
           <div className="w-full text-left">
-            <h2
-              className={cn("mb-3 text-center text-lg font-semibold", template.headingFont)}
-              style={getTextStyle(colors.textColor)}
-            >
-              Lista de Presentes
-            </h2>
-            <div className="grid grid-cols-2 gap-3">
-              {PLACEHOLDER_GIFTS.map((gift) => (
-                <div
-                  key={gift.id}
-                  className={cn("overflow-hidden rounded-lg border text-left", template.cardClass)}
-                  style={cardStyle}
-                >
-                  <div className={cn("h-16 w-full bg-muted", shapeClass.image)} />
-                  <div className="p-2">
-                    <p className="text-xs font-medium">{gift.title}</p>
-                  </div>
+            {askGiftIntent && wantsGifts === null && (
+              <div className="flex flex-col items-center gap-2 text-center">
+                <p className="text-sm font-medium" style={getTextStyle(colors.textColor)}>
+                  Quer presentear o casal?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    style={accentStyle}
+                    className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+                    onClick={() => setWantsGifts(true)}
+                  >
+                    Sim, ver presentes
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md border px-3 py-1.5 text-xs font-medium"
+                    onClick={() => setWantsGifts(false)}
+                  >
+                    Agora não
+                  </button>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {askGiftIntent && wantsGifts === false && (
+              <div className="flex flex-col items-center gap-1 text-center">
+                <p className="text-sm font-medium opacity-80" style={mutedStyle}>
+                  Sem problemas!
+                </p>
+                <button
+                  type="button"
+                  className="text-xs underline opacity-70"
+                  style={mutedStyle}
+                  onClick={() => setWantsGifts(true)}
+                >
+                  Ver lista de presentes
+                </button>
+              </div>
+            )}
+
+            {(!askGiftIntent || wantsGifts === true) && (
+              <>
+                <h2
+                  className={cn("mb-3 text-center text-lg font-semibold", template.headingFont)}
+                  style={getTextStyle(colors.textColor)}
+                >
+                  Lista de Presentes
+                </h2>
+                <div className="grid grid-cols-2 gap-3">
+                  {PLACEHOLDER_GIFTS.map((gift) => (
+                    <div
+                      key={gift.id}
+                      className={cn("overflow-hidden rounded-lg border text-left", template.cardClass)}
+                      style={cardStyle}
+                    >
+                      <div className={cn("h-16 w-full bg-muted", shapeClass.image)} />
+                      <div className="p-2">
+                        <p className="text-xs font-medium">{gift.title}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="w-full text-left">
@@ -318,7 +366,10 @@ function RsvpPreview({
           <button
             type="button"
             className="self-center text-xs text-muted-foreground underline"
-            onClick={() => setStep("respond")}
+            onClick={() => {
+              setStep("respond");
+              setWantsGifts(null);
+            }}
           >
             Reiniciar prévia
           </button>

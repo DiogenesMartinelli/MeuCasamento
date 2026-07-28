@@ -53,6 +53,7 @@ export default async function RsvpPage({ params }: PageProps) {
       giftCardShape={account.siteSettings?.giftCardShape}
       colors={colors}
       rsvpTheme={account.rsvpTheme}
+      askGiftIntent={account.siteSettings?.askGiftIntent ?? true}
     />
   );
 }

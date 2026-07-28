@@ -33,6 +33,7 @@ export function RsvpFlow({
   giftCardShape,
   colors,
   rsvpTheme,
+  askGiftIntent = true,
 }: {
   familyToken: string;
   slug: string;
@@ -49,10 +50,13 @@ export function RsvpFlow({
   giftCardShape?: GiftCardShape;
   colors?: SiteColors;
   rsvpTheme?: RsvpTheme | null;
+  askGiftIntent?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<GuestStatus>(initialStatus);
   const [error, setError] = useState<string | null>(null);
+  // null = not answered yet (only meaningful when askGiftIntent is on).
+  const [wantsGifts, setWantsGifts] = useState<boolean | null>(null);
   // Once a family has answered, their link always lands on "hub" - a permanent page
   // they can revisit, not a one-time "thanks" screen that dead-ends every time.
   const [step, setStep] = useState<Step>(initialStatus === "PENDING" ? "respond" : "hub");
@@ -231,13 +235,49 @@ export function RsvpFlow({
 
             {gifts.length > 0 && (
               <div className={frameClass} style={frameStyle}>
-                <h2
-                  className={cn("mb-6 text-center text-2xl font-semibold", resolvedHeadingFont)}
-                  style={getTextStyle(colors?.textColor)}
-                >
-                  Lista de Presentes
-                </h2>
-                <GiftsList gifts={gifts} events={events} colors={colors} shape={giftCardShape} />
+                {askGiftIntent && wantsGifts === null && (
+                  <div className="flex flex-col items-center gap-3">
+                    <p className="font-medium" style={getTextStyle(colors?.textColor)}>
+                      Quer presentear o casal?
+                    </p>
+                    <div className="flex gap-3">
+                      <Button style={accentStyle} onClick={() => setWantsGifts(true)}>
+                        Sim, quero ver os presentes
+                      </Button>
+                      <Button variant="outline" onClick={() => setWantsGifts(false)}>
+                        Agora não
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {askGiftIntent && wantsGifts === false && (
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="font-medium opacity-80" style={mutedStyle}>
+                      Sem problemas!
+                    </p>
+                    <button
+                      type="button"
+                      className="text-xs underline opacity-70"
+                      style={mutedStyle}
+                      onClick={() => setWantsGifts(true)}
+                    >
+                      Ver lista de presentes
+                    </button>
+                  </div>
+                )}
+
+                {(!askGiftIntent || wantsGifts === true) && (
+                  <>
+                    <h2
+                      className={cn("mb-6 text-center text-2xl font-semibold", resolvedHeadingFont)}
+                      style={getTextStyle(colors?.textColor)}
+                    >
+                      Lista de Presentes
+                    </h2>
+                    <GiftsList gifts={gifts} events={events} colors={colors} shape={giftCardShape} />
+                  </>
+                )}
               </div>
             )}
 
