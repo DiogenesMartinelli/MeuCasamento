@@ -21,7 +21,7 @@ import { GradientColorField } from "@/components/admin/gradient-color-field";
 import { ImageField } from "@/components/admin/image-field";
 import { VideoField } from "@/components/admin/video-field";
 import { OptionPicker } from "@/components/admin/option-picker";
-import { StringLights, Sparkles, AnimatedBackground, LightingOverlay } from "@/components/public/rsvp-decorations";
+import { StringLights, Sparkles, AnimatedBackground, LightingOverlay, ConfirmBurst } from "@/components/public/rsvp-decorations";
 import { cn } from "@/lib/utils";
 import type {
   RsvpAnimatedBackground,
@@ -336,6 +336,7 @@ export function RsvpThemeForm({ rsvpTheme }: { rsvpTheme: RsvpTheme | null }) {
             confirmedFontFamily={confirmedFontFamily}
             confirmedTextColor={confirmedTextColor}
             confirmedMessage={confirmedMessage}
+            confirmAnimation={confirmAnimation}
           />
         </div>
       </div>
@@ -357,6 +358,7 @@ function RsvpThemePreview({
   confirmedFontFamily,
   confirmedTextColor,
   confirmedMessage,
+  confirmAnimation,
 }: {
   enabled: boolean;
   backgroundType: RsvpBackgroundType;
@@ -371,8 +373,13 @@ function RsvpThemePreview({
   confirmedFontFamily: RsvpFontFamily;
   confirmedTextColor: string;
   confirmedMessage: string;
+  confirmAnimation: RsvpConfirmAnimation;
 }) {
   const [showConfirmed, setShowConfirmed] = useState(false);
+  // Bumped on every transition into the confirmed view (not just the first) so the
+  // burst - a one-shot animation - actually replays each time someone previews it,
+  // instead of only ever playing once per page load.
+  const [burstTrigger, setBurstTrigger] = useState(0);
   const headingFont = getRsvpFontClass(fontFamily, "font-sans font-semibold");
   const confirmedFont = getRsvpFontClass(
     confirmedFontFamily === "INHERIT" ? fontFamily : confirmedFontFamily,
@@ -382,6 +389,11 @@ function RsvpThemePreview({
     ? getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards)
     : undefined;
   const hasFrame = !!frameStyle;
+
+  function goToConfirmed() {
+    setShowConfirmed(true);
+    setBurstTrigger((t) => t + 1);
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -424,6 +436,7 @@ function RsvpThemePreview({
           {enabled && <LightingOverlay effect={lightingEffect} />}
           {enabled && showStringLights && <StringLights />}
           {enabled && showSparkles && <Sparkles />}
+          {enabled && <ConfirmBurst key={burstTrigger} variant={confirmAnimation} active={showConfirmed} />}
 
           <div
             className={cn("relative z-10 flex w-full max-w-xs flex-col items-center gap-4", hasFrame && "rounded-xl p-6")}
@@ -441,7 +454,7 @@ function RsvpThemePreview({
                   type="button"
                   className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
                   style={getAccentButtonStyle(colors.accentColor)}
-                  onClick={() => setShowConfirmed(true)}
+                  onClick={goToConfirmed}
                 >
                   Confirmar presença
                 </button>
@@ -458,7 +471,7 @@ function RsvpThemePreview({
               type="button"
               className="text-xs underline opacity-70"
               style={getMutedTextStyle(colors.mutedTextColor)}
-              onClick={() => setShowConfirmed((v) => !v)}
+              onClick={() => (showConfirmed ? setShowConfirmed(false) : goToConfirmed())}
             >
               {showConfirmed ? "Ver etapa de confirmação" : "Ver etapa depois de confirmar"}
             </button>
