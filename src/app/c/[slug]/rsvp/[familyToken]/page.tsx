@@ -37,6 +37,7 @@ export default async function RsvpPage({ params }: PageProps) {
     <RsvpFlow
       familyToken={familyToken}
       slug={slug}
+      accountId={account.id}
       coupleName={account.siteSettings?.coupleName || ""}
       familyGuests={familyGuests}
       initialStatus={familyGuests[0].status}
@@ -51,7 +52,6 @@ export default async function RsvpPage({ params }: PageProps) {
       cardClass={template.cardClass}
       giftCardShape={account.siteSettings?.giftCardShape}
       colors={colors}
-      askGiftIntent={account.siteSettings?.askGiftIntent ?? true}
       rsvpTheme={account.rsvpTheme}
     />
   );

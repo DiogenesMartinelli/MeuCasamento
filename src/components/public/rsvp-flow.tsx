@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { respondRsvp } from "@/lib/actions/rsvp";
 import { Button } from "@/components/ui/button";
 import { GiftsList } from "@/components/public/gifts-list";
+import { GuestMessageForm } from "@/components/public/guest-message-form";
 import { getAccentButtonStyle, getCardStyle, getTextStyle, getMutedTextStyle, getSectionStyle } from "@/lib/accent-color";
 import type { SiteColors } from "@/lib/accent-color";
 import { getAnimatedBackgroundStyle, getRsvpFontClass } from "@/lib/rsvp-theme";
@@ -12,13 +13,14 @@ import { cn } from "@/lib/utils";
 import type { SerializedGift } from "@/lib/queries/gifts";
 import type { Event, GiftCardShape, GuestStatus, RsvpTheme } from "@/generated/prisma/client";
 
-type Step = "respond" | "thanks" | "ask-gift" | "gifts" | "done";
+type Step = "respond" | "hub";
 
 type FamilyGuest = { id: string; name: string; event: { name: string } };
 
 export function RsvpFlow({
   familyToken,
   slug,
+  accountId,
   coupleName,
   familyGuests,
   initialStatus,
@@ -30,11 +32,11 @@ export function RsvpFlow({
   cardClass,
   giftCardShape,
   colors,
-  askGiftIntent = true,
   rsvpTheme,
 }: {
   familyToken: string;
   slug: string;
+  accountId: string;
   coupleName: string;
   familyGuests: FamilyGuest[];
   initialStatus: GuestStatus;
@@ -46,13 +48,14 @@ export function RsvpFlow({
   cardClass: string;
   giftCardShape?: GiftCardShape;
   colors?: SiteColors;
-  askGiftIntent?: boolean;
   rsvpTheme?: RsvpTheme | null;
 }) {
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<GuestStatus>(initialStatus);
   const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<Step>(initialStatus === "PENDING" ? "respond" : "thanks");
+  // Once a family has answered, their link always lands on "hub" - a permanent page
+  // they can revisit, not a one-time "thanks" screen that dead-ends every time.
+  const [step, setStep] = useState<Step>(initialStatus === "PENDING" ? "respond" : "hub");
   const [justConfirmed, setJustConfirmed] = useState(false);
   const accentStyle = getAccentButtonStyle(colors?.accentColor);
   const mutedStyle = getMutedTextStyle(colors?.mutedTextColor);
@@ -64,10 +67,6 @@ export function RsvpFlow({
   const isAnimated = backgroundType === "ANIMATED";
   const needsLightText = usesMedia && !colors?.textColor;
 
-  // For a ready-made animated background, the couple's own color/gradient becomes
-  // the backdrop under the particles when set - otherwise the preset falls back to
-  // its own backdrop, so petals/snow/fireflies always render against something with
-  // enough contrast instead of the page's plain default background.
   const animatedBackdropStyle = isAnimated
     ? getAnimatedBackgroundStyle(
         rsvpTheme?.animatedBackground,
@@ -91,13 +90,15 @@ export function RsvpFlow({
       : getTextStyle(colors?.textColor);
   const confirmedMessage = (useCustomBg && rsvpTheme?.confirmedMessage) || "Presença confirmada! Vemos vocês lá 🎉";
 
-  // "Vitrificação" wraps the whole confirmation panel, not individual elements inside
-  // it - a single frame is the correct read of "glass card", not a glass list plus
-  // plain buttons floating separately.
+  // "Vitrificação" wraps each block of the hub as its own glass frame - the correct
+  // read of "glass card" is a frame per block, not one giant panel or a bunch of
+  // plain unstyled content floating on the background.
   const frameStyle = useCustomBg
     ? getCardStyle(colors?.cardBackgroundColor, colors?.borderColor, colors?.cardBackgroundGradientTo, colors?.glassCards)
     : undefined;
   const hasFrame = !!frameStyle;
+  const frameClass = cn("animate-rsvp-step-in", hasFrame && "rounded-2xl p-8 sm:p-10");
+  const listClass = cn("w-full divide-y rounded-lg", hasFrame ? "divide-white/15" : cn("border", cardClass));
 
   function handle(next: "CONFIRMED" | "DECLINED") {
     setError(null);
@@ -105,8 +106,8 @@ export function RsvpFlow({
       try {
         await respondRsvp(familyToken, slug, next);
         setStatus(next);
-        setStep("thanks");
-        if (next === "CONFIRMED") setJustConfirmed(true);
+        setStep("hub");
+        setJustConfirmed(next === "CONFIRMED");
       } catch {
         setError("Não foi possível registrar sua resposta. Tente novamente.");
       }
@@ -153,96 +154,104 @@ export function RsvpFlow({
         <ConfirmBurst variant={rsvpTheme?.confirmAnimation ?? "NONE"} active={justConfirmed} />
       )}
 
-      <div className={cn("relative z-10 w-full", needsLightText && "text-white", step === "gifts" ? "max-w-6xl" : "max-w-lg")}>
-        {step === "gifts" ? (
-          <>
-            <h1
-              className={cn("mb-6 text-center text-3xl font-semibold", resolvedHeadingFont)}
-              style={getTextStyle(colors?.textColor)}
-            >
-              Lista de Presentes
-            </h1>
-            <GiftsList gifts={gifts} events={events} colors={colors} shape={giftCardShape} />
-          </>
-        ) : (
-          <div
-            key={step}
-            className={cn(
-              "flex flex-col items-center gap-8 text-center animate-rsvp-step-in",
-              hasFrame && "rounded-2xl p-8 sm:p-10",
-            )}
-            style={frameStyle}
-          >
-            {step === "respond" && (
-              <>
-                <div>
-                  <h1 className={cn("text-3xl font-semibold", resolvedHeadingFont)}>Confirme sua presença</h1>
-                  <p className="mt-2 opacity-80" style={mutedStyle}>
-                    {coupleName}
+      <div className={cn("relative z-10 w-full", needsLightText && "text-white", step === "hub" ? "max-w-4xl" : "max-w-lg")}>
+        {step === "respond" && (
+          <div key="respond" className={cn("flex flex-col items-center gap-8 text-center", frameClass)} style={frameStyle}>
+            <div>
+              <h1 className={cn("text-3xl font-semibold", resolvedHeadingFont)}>Confirme sua presença</h1>
+              <p className="mt-2 opacity-80" style={mutedStyle}>
+                {coupleName}
+              </p>
+            </div>
+
+            <ul className={listClass}>
+              {familyGuests.map((guest) => (
+                <li key={guest.id} className="flex items-center justify-between px-4 py-3">
+                  <span className="font-medium">{guest.name}</span>
+                  <span className="text-xs text-muted-foreground">{guest.event.name}</span>
+                </li>
+              ))}
+            </ul>
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <div className="flex gap-3">
+              <Button style={accentStyle} onClick={() => handle("CONFIRMED")} disabled={isPending}>
+                Confirmar presença
+              </Button>
+              <Button variant="outline" onClick={() => handle("DECLINED")} disabled={isPending}>
+                Não poderei ir
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === "hub" && (
+          <div key="hub" className="flex flex-col gap-8">
+            <div className={cn("flex flex-col items-center gap-4 text-center", frameClass)} style={frameStyle}>
+              {status === "CONFIRMED" ? (
+                <p className={cn("font-medium", confirmedFont)} style={confirmedTextStyle}>
+                  {confirmedMessage}
+                </p>
+              ) : (
+                <p className="font-medium opacity-80" style={mutedStyle}>
+                  {declineMessage}
+                </p>
+              )}
+
+              <ul className={cn(listClass, "max-w-sm text-left")}>
+                {familyGuests.map((guest) => (
+                  <li key={guest.id} className="flex items-center justify-between px-4 py-3">
+                    <span className="font-medium">{guest.name}</span>
+                    <span className="text-xs text-muted-foreground">{guest.event.name}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              {status === "CONFIRMED" ? (
+                <div className="flex flex-col items-center gap-1.5">
+                  <p className="text-xs opacity-70" style={mutedStyle}>
+                    Não vai poder vir mais?
                   </p>
+                  <Button variant="outline" size="sm" onClick={() => handle("DECLINED")} disabled={isPending}>
+                    Avisar que não vou
+                  </Button>
                 </div>
-
-                <ul className={cn("w-full divide-y rounded-lg", hasFrame ? "divide-white/15" : cn("border", cardClass))}>
-                  {familyGuests.map((guest) => (
-                    <li key={guest.id} className="flex items-center justify-between px-4 py-3">
-                      <span className="font-medium">{guest.name}</span>
-                      <span className="text-xs text-muted-foreground">{guest.event.name}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <div className="flex gap-3">
-                  <Button style={accentStyle} onClick={() => handle("CONFIRMED")} disabled={isPending}>
+              ) : (
+                <div className="flex flex-col items-center gap-1.5">
+                  <p className="text-xs opacity-70" style={mutedStyle}>
+                    Mudou de ideia?
+                  </p>
+                  <Button style={accentStyle} size="sm" onClick={() => handle("CONFIRMED")} disabled={isPending}>
                     Confirmar presença
                   </Button>
-                  <Button variant="outline" onClick={() => handle("DECLINED")} disabled={isPending}>
-                    Não poderei ir
-                  </Button>
                 </div>
-              </>
-            )}
+              )}
+            </div>
 
-            {step === "thanks" && (
-              <div className="flex flex-col items-center gap-4">
-                {status === "CONFIRMED" && (
-                  <p className={cn("font-medium", confirmedFont)} style={confirmedTextStyle}>
-                    {confirmedMessage}
-                  </p>
-                )}
-                {status === "DECLINED" && (
-                  <p className="font-medium opacity-80" style={mutedStyle}>
-                    {declineMessage}
-                  </p>
-                )}
-                <Button
-                  style={accentStyle}
-                  onClick={() => setStep(askGiftIntent ? "ask-gift" : "gifts")}
+            {gifts.length > 0 && (
+              <div className={frameClass} style={frameStyle}>
+                <h2
+                  className={cn("mb-6 text-center text-2xl font-semibold", resolvedHeadingFont)}
+                  style={getTextStyle(colors?.textColor)}
                 >
-                  Continuar
-                </Button>
+                  Lista de Presentes
+                </h2>
+                <GiftsList gifts={gifts} events={events} colors={colors} shape={giftCardShape} />
               </div>
             )}
 
-            {step === "ask-gift" && (
-              <div className="flex flex-col items-center gap-4">
-                <p className="font-medium">Quer presentear o casal?</p>
-                <div className="flex gap-3">
-                  <Button style={accentStyle} onClick={() => setStep("gifts")}>
-                    Sim, quero ver os presentes
-                  </Button>
-                  <Button variant="outline" onClick={() => setStep("done")}>
-                    Agora não
-                  </Button>
-                </div>
+            <div className={frameClass} style={frameStyle}>
+              <h2
+                className={cn("mb-4 text-center text-2xl font-semibold", resolvedHeadingFont)}
+                style={getTextStyle(colors?.textColor)}
+              >
+                Deixe um recado para os noivos
+              </h2>
+              <div className="mx-auto max-w-lg">
+                <GuestMessageForm accountId={accountId} slug={slug} defaultAuthorName={familyGuests[0]?.name} />
               </div>
-            )}
-
-            {step === "done" && (
-              <p className="font-medium opacity-80" style={mutedStyle}>
-                Combinado! Até breve 💛
-              </p>
-            )}
+            </div>
           </div>
         )}
       </div>

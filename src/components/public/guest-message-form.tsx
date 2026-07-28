@@ -8,7 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 
 const initialState: GuestMessageFormState = {};
 
-export function GuestMessageForm({ accountId, slug }: { accountId: string; slug: string }) {
+export function GuestMessageForm({
+  accountId,
+  slug,
+  defaultAuthorName,
+}: {
+  accountId: string;
+  slug: string;
+  defaultAuthorName?: string;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const action = createGuestMessage.bind(null, accountId, slug);
   const [state, formAction, isPending] = useActionState(action, initialState);
@@ -19,7 +27,7 @@ export function GuestMessageForm({ accountId, slug }: { accountId: string; slug:
 
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-3">
-      <Input name="authorName" placeholder="Seu nome" required maxLength={80} />
+      <Input name="authorName" placeholder="Seu nome" defaultValue={defaultAuthorName} required maxLength={80} />
       <Textarea
         name="content"
         placeholder="Deixe seu recado para os noivos..."

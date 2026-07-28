@@ -29,7 +29,6 @@ export type SitePreviewProps = {
   welcomeMessage: string;
   declineMessage: string;
   giftCardShape: GiftCardShape;
-  askGiftIntent: boolean;
   backgroundImageUrl?: string | null;
   profileImageUrl?: string | null;
 };
@@ -73,7 +72,7 @@ export function SitePreview(props: SitePreviewProps) {
           {tab === "site" ? (
             <SitePreviewHome {...props} templateConfig={template} />
           ) : (
-            <RsvpPreview {...props} templateConfig={template} key={String(props.askGiftIntent)} />
+            <RsvpPreview {...props} templateConfig={template} />
           )}
         </div>
       </div>
@@ -168,7 +167,7 @@ function SitePreviewHome({
   );
 }
 
-type RsvpStep = "respond" | "thanks" | "ask-gift" | "gifts" | "done";
+type RsvpStep = "respond" | "hub";
 
 function RsvpPreview({
   templateConfig: template,
@@ -176,13 +175,18 @@ function RsvpPreview({
   coupleName,
   declineMessage,
   giftCardShape,
-  askGiftIntent,
 }: SitePreviewProps & { templateConfig: SiteTemplateConfig }) {
   const [step, setStep] = useState<RsvpStep>("respond");
-  const [status, setStatus] = useState<"CONFIRMED" | "DECLINED" | null>(null);
+  const [status, setStatus] = useState<"CONFIRMED" | "DECLINED">("CONFIRMED");
   const accentStyle = getAccentButtonStyle(colors.accentColor);
   const mutedStyle = getMutedTextStyle(colors.mutedTextColor);
+  const cardStyle = getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards);
   const shapeClass = GIFT_CARD_SHAPE_CLASS[giftCardShape];
+
+  function respond(next: "CONFIRMED" | "DECLINED") {
+    setStatus(next);
+    setStep("hub");
+  }
 
   return (
     <div
@@ -199,7 +203,7 @@ function RsvpPreview({
           </div>
           <div
             className={cn("w-full max-w-[220px] rounded-lg border px-3 py-2 text-xs", template.cardClass)}
-            style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards)}
+            style={cardStyle}
           >
             Convidado Exemplo
           </div>
@@ -208,20 +212,14 @@ function RsvpPreview({
               type="button"
               style={accentStyle}
               className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
-              onClick={() => {
-                setStatus("CONFIRMED");
-                setStep("thanks");
-              }}
+              onClick={() => respond("CONFIRMED")}
             >
               Confirmar presença
             </button>
             <button
               type="button"
               className="rounded-md border px-3 py-1.5 text-xs font-medium"
-              onClick={() => {
-                setStatus("DECLINED");
-                setStep("thanks");
-              }}
+              onClick={() => respond("DECLINED")}
             >
               Não poderei ir
             </button>
@@ -229,96 +227,102 @@ function RsvpPreview({
         </>
       )}
 
-      {step === "thanks" && (
-        <div className="flex flex-col items-center gap-3">
-          {status === "CONFIRMED" ? (
-            <p
-              className="text-sm font-medium text-black"
-              style={{ textShadow: "0 0 10px rgba(255,255,255,0.9), 0 0 20px rgba(255,220,150,0.7)" }}
+      {step === "hub" && (
+        <div className="flex w-full flex-col gap-6">
+          <div className="flex flex-col items-center gap-3">
+            {status === "CONFIRMED" ? (
+              <p
+                className="text-sm font-medium text-black"
+                style={{ textShadow: "0 0 10px rgba(255,255,255,0.9), 0 0 20px rgba(255,220,150,0.7)" }}
+              >
+                Presença confirmada! Vemos vocês lá 🎉
+              </p>
+            ) : (
+              <p className="text-sm font-medium opacity-80" style={mutedStyle}>
+                {declineMessage}
+              </p>
+            )}
+            <div
+              className={cn("w-full max-w-[220px] rounded-lg border px-3 py-2 text-xs", template.cardClass)}
+              style={cardStyle}
             >
-              Presença confirmada! Vemos vocês lá 🎉
-            </p>
-          ) : (
-            <p className="text-sm font-medium opacity-80" style={mutedStyle}>
-              {declineMessage}
-            </p>
-          )}
+              Convidado Exemplo
+            </div>
+            {status === "CONFIRMED" ? (
+              <button
+                type="button"
+                className="rounded-md border px-3 py-1.5 text-xs font-medium"
+                onClick={() => respond("DECLINED")}
+              >
+                Avisar que não vou
+              </button>
+            ) : (
+              <button
+                type="button"
+                style={accentStyle}
+                className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+                onClick={() => respond("CONFIRMED")}
+              >
+                Confirmar presença
+              </button>
+            )}
+          </div>
+
+          <div className="w-full text-left">
+            <h2
+              className={cn("mb-3 text-center text-lg font-semibold", template.headingFont)}
+              style={getTextStyle(colors.textColor)}
+            >
+              Lista de Presentes
+            </h2>
+            <div className="grid grid-cols-2 gap-3">
+              {PLACEHOLDER_GIFTS.map((gift) => (
+                <div
+                  key={gift.id}
+                  className={cn("overflow-hidden rounded-lg border text-left", template.cardClass)}
+                  style={cardStyle}
+                >
+                  <div className={cn("h-16 w-full bg-muted", shapeClass.image)} />
+                  <div className="p-2">
+                    <p className="text-xs font-medium">{gift.title}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="w-full text-left">
+            <h2
+              className={cn("mb-3 text-center text-lg font-semibold", template.headingFont)}
+              style={getTextStyle(colors.textColor)}
+            >
+              Deixe um recado para os noivos
+            </h2>
+            <div className={cn("flex flex-col gap-2 rounded-lg border p-3", template.cardClass)} style={cardStyle}>
+              <div className="rounded border bg-white/70 px-2 py-1 text-xs text-muted-foreground">
+                Convidado Exemplo
+              </div>
+              <div className="rounded border bg-white/70 px-2 py-6 text-xs text-muted-foreground">
+                Deixe seu recado para os noivos...
+              </div>
+              <button
+                type="button"
+                style={accentStyle}
+                className="self-start rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+              >
+                Enviar recado
+              </button>
+            </div>
+          </div>
+
           <button
             type="button"
-            style={accentStyle}
-            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
-            onClick={() => setStep(askGiftIntent ? "ask-gift" : "gifts")}
+            className="self-center text-xs text-muted-foreground underline"
+            onClick={() => setStep("respond")}
           >
-            Continuar
+            Reiniciar prévia
           </button>
         </div>
-      )}
-
-      {step === "ask-gift" && (
-        <div className="flex flex-col items-center gap-3">
-          <p className="text-sm font-medium">Quer presentear o casal?</p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              style={accentStyle}
-              className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
-              onClick={() => setStep("gifts")}
-            >
-              Sim, ver presentes
-            </button>
-            <button
-              type="button"
-              className="rounded-md border px-3 py-1.5 text-xs font-medium"
-              onClick={() => setStep("done")}
-            >
-              Agora não
-            </button>
-          </div>
-        </div>
-      )}
-
-      {step === "done" && (
-        <p className="text-sm font-medium opacity-80" style={mutedStyle}>
-          Combinado! Até breve 💛
-        </p>
-      )}
-
-      {step === "gifts" && (
-        <div className="w-full">
-          <h2
-            className={cn("mb-3 text-center text-lg font-semibold", template.headingFont)}
-            style={getTextStyle(colors.textColor)}
-          >
-            Lista de Presentes
-          </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {PLACEHOLDER_GIFTS.map((gift) => (
-              <div
-                key={gift.id}
-                className={cn("overflow-hidden rounded-lg border text-left", template.cardClass)}
-                style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards)}
-              >
-                <div className={cn("h-16 w-full bg-muted", shapeClass.image)} />
-                <div className="p-2">
-                  <p className="text-xs font-medium">{gift.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {step !== "respond" && (
-        <button
-          type="button"
-          className="text-xs text-muted-foreground underline"
-          onClick={() => {
-            setStep("respond");
-            setStatus(null);
-          }}
-        >
-          Reiniciar prévia
-        </button>
       )}
     </div>
   );

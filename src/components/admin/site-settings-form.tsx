@@ -26,7 +26,6 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
   const [welcomeMessage, setWelcomeMessage] = useState(settings?.welcomeMessage ?? "");
   const [declineMessage, setDeclineMessage] = useState(settings?.declineMessage ?? DEFAULT_DECLINE_MESSAGE);
   const [giftCardShape, setGiftCardShape] = useState<GiftCardShape>(settings?.giftCardShape ?? "ROUNDED");
-  const [askGiftIntent, setAskGiftIntent] = useState(settings?.askGiftIntent ?? true);
   const [colors, setColors] = useState<SiteColors>({
     accentColor: settings?.accentColor,
     backgroundColor: settings?.backgroundColor,
@@ -196,24 +195,6 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 rounded-lg border p-4">
-          <label className="flex items-center gap-2 text-sm font-medium">
-            <input
-              type="checkbox"
-              name="askGiftIntent"
-              checked={askGiftIntent}
-              onChange={(e) => setAskGiftIntent(e.target.checked)}
-              className="h-4 w-4 rounded border-input"
-            />
-            Perguntar se o convidado quer presentear antes de mostrar a lista
-          </label>
-          <p className="text-xs text-muted-foreground">
-            {askGiftIntent
-              ? "No RSVP, depois da confirmação o convidado vê a pergunta \"quer presentear o casal?\" antes da lista de presentes."
-              : "No RSVP, depois da confirmação o convidado já vê a lista de presentes direto, sem pergunta intermediária."}
-          </p>
-        </div>
-
         <ImageField
           name="backgroundImage"
           label="Imagem de fundo (hero)"
@@ -251,7 +232,6 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettings | null }
             welcomeMessage={welcomeMessage}
             declineMessage={declineMessage}
             giftCardShape={giftCardShape}
-            askGiftIntent={askGiftIntent}
             backgroundImageUrl={backgroundImageUrl}
             profileImageUrl={profileImageUrl}
           />
