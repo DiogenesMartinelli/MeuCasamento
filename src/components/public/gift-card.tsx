@@ -36,7 +36,7 @@ export function GiftCard({
   const mutedStyle = getMutedTextStyle(colors?.mutedTextColor);
 
   return (
-    <Card className="flex flex-col overflow-hidden py-0" style={cardStyle}>
+    <Card className="flex flex-col overflow-hidden border py-0" style={cardStyle}>
       {gift.imageUrl && (
         <div className={cn("relative h-44 w-full bg-muted", shapeClass.image)}>
           <Image
