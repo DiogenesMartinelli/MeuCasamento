@@ -14,6 +14,7 @@ import { getSectionStyle, getCardStyle, getTextStyle, getMutedTextStyle, getAcce
 import type { SiteColors } from "@/lib/accent-color";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ColorPickerField } from "@/components/admin/color-picker-field";
 import { GradientColorField } from "@/components/admin/gradient-color-field";
 import { ImageField } from "@/components/admin/image-field";
@@ -66,6 +67,7 @@ export function RsvpThemeForm({ rsvpTheme }: { rsvpTheme: RsvpTheme | null }) {
     cardBackgroundGradientTo: rsvpTheme?.cardBackgroundGradientTo,
     borderColor: rsvpTheme?.borderColor,
   });
+  const [confirmedMessage, setConfirmedMessage] = useState(rsvpTheme?.confirmedMessage ?? "");
   const [confirmedTextColor, setConfirmedTextColor] = useState(rsvpTheme?.confirmedTextColor ?? "");
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(rsvpTheme?.backgroundImageUrl ?? null);
   const [backgroundVideoUrl, setBackgroundVideoUrl] = useState(rsvpTheme?.backgroundVideoUrl ?? null);
@@ -203,6 +205,19 @@ export function RsvpThemeForm({ rsvpTheme }: { rsvpTheme: RsvpTheme | null }) {
 
           <div className="flex flex-col gap-4 rounded-lg border border-dashed p-4">
             <p className="text-sm font-medium">Depois que o convidado confirma</p>
+            <div className="flex flex-col gap-1.5">
+              <Label>Mensagem</Label>
+              <Textarea
+                name="confirmedMessage"
+                rows={2}
+                placeholder="Presença confirmada! Vemos vocês lá 🎉"
+                value={confirmedMessage}
+                onChange={(e) => setConfirmedMessage(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Mostrada só quando o convidado confirma presença (não a recusa). Em branco usa a mensagem padrão.
+              </p>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <Label>Cor do texto</Label>
@@ -305,6 +320,7 @@ export function RsvpThemeForm({ rsvpTheme }: { rsvpTheme: RsvpTheme | null }) {
             fontFamily={fontFamily}
             confirmedFontFamily={confirmedFontFamily}
             confirmedTextColor={confirmedTextColor}
+            confirmedMessage={confirmedMessage}
           />
         </div>
       </div>
@@ -325,6 +341,7 @@ function RsvpThemePreview({
   fontFamily,
   confirmedFontFamily,
   confirmedTextColor,
+  confirmedMessage,
 }: {
   enabled: boolean;
   backgroundType: RsvpBackgroundType;
@@ -338,6 +355,7 @@ function RsvpThemePreview({
   fontFamily: RsvpFontFamily;
   confirmedFontFamily: RsvpFontFamily;
   confirmedTextColor: string;
+  confirmedMessage: string;
 }) {
   const [showConfirmed, setShowConfirmed] = useState(false);
   const headingFont = getRsvpFontClass(fontFamily, "font-sans font-semibold");
@@ -345,6 +363,10 @@ function RsvpThemePreview({
     confirmedFontFamily === "INHERIT" ? fontFamily : confirmedFontFamily,
     headingFont,
   );
+  const frameStyle = enabled
+    ? getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards)
+    : undefined;
+  const hasFrame = !!frameStyle;
 
   return (
     <div className="flex flex-col gap-3">
@@ -382,16 +404,16 @@ function RsvpThemePreview({
           {enabled && showStringLights && <StringLights />}
           {enabled && showSparkles && <Sparkles />}
 
-          <div className="relative z-10 flex w-full flex-col items-center gap-4">
+          <div
+            className={cn("relative z-10 flex w-full max-w-xs flex-col items-center gap-4", hasFrame && "rounded-xl p-6")}
+            style={frameStyle}
+          >
             {!showConfirmed ? (
               <>
                 <h1 className={cn("text-xl font-semibold", headingFont)} style={getTextStyle(colors.textColor)}>
                   Confirme sua presença
                 </h1>
-                <div
-                  className="w-full max-w-[220px] rounded-lg border px-3 py-2 text-xs"
-                  style={getCardStyle(colors.cardBackgroundColor, colors.borderColor, colors.cardBackgroundGradientTo, colors.glassCards)}
-                >
+                <div className={cn("w-full rounded-lg px-3 py-2 text-xs", !hasFrame && "border")}>
                   Convidado Exemplo
                 </div>
                 <button
@@ -408,7 +430,7 @@ function RsvpThemePreview({
                 className={cn("text-lg font-medium", confirmedFont)}
                 style={confirmedTextColor ? { color: confirmedTextColor } : getTextStyle(colors.textColor)}
               >
-                Presença confirmada! Vemos vocês lá 🎉
+                {confirmedMessage || "Presença confirmada! Vemos vocês lá 🎉"}
               </p>
             )}
             <button

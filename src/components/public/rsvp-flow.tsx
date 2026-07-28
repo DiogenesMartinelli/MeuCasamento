@@ -75,6 +75,15 @@ export function RsvpFlow({
     useCustomBg && rsvpTheme?.confirmedTextColor
       ? { color: rsvpTheme.confirmedTextColor }
       : getTextStyle(colors?.textColor);
+  const confirmedMessage = (useCustomBg && rsvpTheme?.confirmedMessage) || "Presença confirmada! Vemos vocês lá 🎉";
+
+  // "Vitrificação" wraps the whole confirmation panel, not individual elements inside
+  // it - a single frame is the correct read of "glass card", not a glass list plus
+  // plain buttons floating separately.
+  const frameStyle = useCustomBg
+    ? getCardStyle(colors?.cardBackgroundColor, colors?.borderColor, colors?.cardBackgroundGradientTo, colors?.glassCards)
+    : undefined;
+  const hasFrame = !!frameStyle;
 
   function handle(next: "CONFIRMED" | "DECLINED") {
     setError(null);
@@ -136,7 +145,14 @@ export function RsvpFlow({
             <GiftsList gifts={gifts} events={events} colors={colors} shape={giftCardShape} />
           </>
         ) : (
-          <div key={step} className="flex flex-col items-center gap-8 text-center motion-safe:animate-rsvp-step-in">
+          <div
+            key={step}
+            className={cn(
+              "flex flex-col items-center gap-8 text-center motion-safe:animate-rsvp-step-in",
+              hasFrame && "rounded-2xl p-8 sm:p-10",
+            )}
+            style={frameStyle}
+          >
             {step === "respond" && (
               <>
                 <div>
@@ -146,10 +162,7 @@ export function RsvpFlow({
                   </p>
                 </div>
 
-                <ul
-                  className={cn("w-full divide-y rounded-lg border", cardClass)}
-                  style={getCardStyle(colors?.cardBackgroundColor, colors?.borderColor, colors?.cardBackgroundGradientTo, colors?.glassCards)}
-                >
+                <ul className={cn("w-full divide-y rounded-lg", hasFrame ? "divide-white/15" : cn("border", cardClass))}>
                   {familyGuests.map((guest) => (
                     <li key={guest.id} className="flex items-center justify-between px-4 py-3">
                       <span className="font-medium">{guest.name}</span>
@@ -174,7 +187,7 @@ export function RsvpFlow({
               <div className="flex flex-col items-center gap-4">
                 {status === "CONFIRMED" && (
                   <p className={cn("font-medium", confirmedFont)} style={confirmedTextStyle}>
-                    Presença confirmada! Vemos vocês lá 🎉
+                    {confirmedMessage}
                   </p>
                 )}
                 {status === "DECLINED" && (

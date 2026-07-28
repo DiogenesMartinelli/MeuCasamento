@@ -37,6 +37,15 @@ function backgroundFill(color?: string | null, gradientTo?: string | null): CSSP
   return {};
 }
 
+function hexToRgba(hex: string, alpha: number): string {
+  const clean = hex.replace("#", "");
+  if (clean.length !== 6) return `rgba(255, 255, 255, ${alpha})`;
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 /** Inline style overriding a filled button's color with the couple's custom accent, if set. */
 export function getAccentButtonStyle(accentColor?: string | null): CSSProperties | undefined {
   if (!accentColor) return undefined;
@@ -87,13 +96,20 @@ export function getMutedTextStyle(mutedTextColor?: string | null): CSSProperties
   return { color: mutedTextColor };
 }
 
-/** Frosted-glass look for cards ("vitrificação"): translucent surface + blurred backdrop. */
-const GLASS_CARD_STYLE: CSSProperties = {
-  backgroundColor: "rgba(255, 255, 255, 0.14)",
-  borderColor: "rgba(255, 255, 255, 0.35)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
-};
+/**
+ * Frosted-glass look for cards ("vitrificação"): translucent surface + blurred
+ * backdrop. Tinted with the chosen card color when one is set, so turning on the
+ * glass effect doesn't silently discard a color the couple already picked -
+ * neutral white/frosted only when no card color was chosen.
+ */
+function glassCardStyle(cardBackgroundColor?: string | null): CSSProperties {
+  return {
+    backgroundColor: cardBackgroundColor ? hexToRgba(cardBackgroundColor, 0.22) : "rgba(255, 255, 255, 0.14)",
+    borderColor: cardBackgroundColor ? hexToRgba(cardBackgroundColor, 0.45) : "rgba(255, 255, 255, 0.35)",
+    backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)",
+  };
+}
 
 /** Inline style overriding a card/surface's background (flat or gradient) and border color. */
 export function getCardStyle(
@@ -102,7 +118,7 @@ export function getCardStyle(
   cardBackgroundGradientTo?: string | null,
   glassCards?: boolean | null,
 ): CSSProperties | undefined {
-  if (glassCards) return GLASS_CARD_STYLE;
+  if (glassCards) return glassCardStyle(cardBackgroundColor);
   if (!cardBackgroundColor && !borderColor) return undefined;
   return {
     ...backgroundFill(cardBackgroundColor, cardBackgroundGradientTo),

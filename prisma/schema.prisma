@@ -190,6 +190,9 @@ model RsvpTheme {
 
   /// Optional overrides applied only to the "thanks" step, shown right after the
   /// guest confirms or declines - lets that moment stand out from the rest of the flow.
+  /// confirmedMessage replaces the default "Presença confirmada!" text when set;
+  /// the decline message stays on SiteSettings.declineMessage (shared with the site).
+  confirmedMessage     String?
   confirmedTextColor   String?
   confirmedFontFamily  RsvpFontFamily?
 

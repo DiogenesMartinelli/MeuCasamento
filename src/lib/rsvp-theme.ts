@@ -44,10 +44,13 @@ export const RSVP_CONFIRM_ANIMATION_OPTIONS: { value: RsvpConfirmAnimation; labe
   { value: "FIREWORKS", label: "Fogos" },
 ];
 
+// Only the typeface, never a size - the caller already sets a size class (text-xl,
+// text-3xl, ...) and mixing a size in here fights it via tailwind-merge, silently
+// dropping the caller's size and blowing the heading up to whatever's set here.
 const RSVP_FONT_CLASS: Record<Exclude<RsvpFontFamily, "INHERIT">, string> = {
   SANS: "font-sans font-semibold",
   SERIF: "font-playfair",
-  SCRIPT: "font-dancing-script text-6xl sm:text-7xl",
+  SCRIPT: "font-dancing-script",
 };
 
 /** Maps a font choice to its Tailwind class, falling back to the site template's heading font when unset/INHERIT. */
