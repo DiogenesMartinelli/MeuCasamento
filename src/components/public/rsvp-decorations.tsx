@@ -184,14 +184,14 @@ const CONFETTI_COLORS = ["bg-rose-400", "bg-amber-300", "bg-sky-400", "bg-emeral
 export function ConfirmBurst({ variant, active }: { variant: RsvpConfirmAnimation; active: boolean }) {
   if (!active || variant === "NONE") return null;
 
-  const count = 16;
+  const count = 24;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden" aria-hidden>
+    <div className="pointer-events-none absolute inset-0 z-30 overflow-visible" aria-hidden>
       {Array.from({ length: count }).map((_, i) => {
         const angle = (360 / count) * i;
-        const distance = 90 + ((i * 17) % 40);
-        const delay = (i % 4) * 0.05;
+        const distance = 160 + ((i * 17) % 90);
+        const delay = (i % 4) * 0.06;
         const style = {
           "--rsvp-burst-angle": `${angle}deg`,
           "--rsvp-burst-distance": `${distance}px`,
@@ -205,7 +205,7 @@ export function ConfirmBurst({ variant, active }: { variant: RsvpConfirmAnimatio
             <span
               key={i}
               className={cn(
-                "absolute size-2 animate-rsvp-burst",
+                "absolute size-3 animate-rsvp-burst",
                 CONFETTI_COLORS[i % CONFETTI_COLORS.length],
               )}
               style={style}
@@ -214,7 +214,7 @@ export function ConfirmBurst({ variant, active }: { variant: RsvpConfirmAnimatio
         }
         if (variant === "HEARTS") {
           return (
-            <span key={i} className="absolute text-lg text-rose-500 animate-rsvp-burst" style={style}>
+            <span key={i} className="absolute text-2xl text-rose-500 animate-rsvp-burst" style={style}>
               ♥
             </span>
           );
@@ -223,7 +223,7 @@ export function ConfirmBurst({ variant, active }: { variant: RsvpConfirmAnimatio
         return (
           <span
             key={i}
-            className="absolute size-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_2px_rgba(252,211,77,0.8)] animate-rsvp-burst"
+            className="absolute size-2.5 rounded-full bg-amber-300 shadow-[0_0_10px_4px_rgba(252,211,77,0.85)] animate-rsvp-burst"
             style={style}
           />
         );
