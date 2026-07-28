@@ -8,6 +8,7 @@ import {
   RSVP_CONFIRM_ANIMATION_OPTIONS,
   RSVP_FONT_OPTIONS,
   RSVP_LIGHTING_EFFECT_OPTIONS,
+  getAnimatedBackgroundStyle,
   getRsvpFontClass,
 } from "@/lib/rsvp-theme";
 import { getSectionStyle, getCardStyle, getTextStyle, getMutedTextStyle, getAccentButtonStyle } from "@/lib/accent-color";
@@ -132,7 +133,7 @@ export function RsvpThemeForm({ rsvpTheme }: { rsvpTheme: RsvpTheme | null }) {
               </div>
             )}
             {backgroundType === "ANIMATED" && (
-              <div className="mt-2">
+              <div className="mt-2 flex flex-col gap-3">
                 <OptionPicker
                   name="animatedBackground"
                   options={RSVP_ANIMATED_BACKGROUND_OPTIONS}
@@ -140,6 +141,20 @@ export function RsvpThemeForm({ rsvpTheme }: { rsvpTheme: RsvpTheme | null }) {
                   onChange={setAnimatedBackground}
                   size="sm"
                 />
+                <div className="max-w-xs">
+                  <GradientColorField
+                    name="backgroundColor"
+                    gradientName="backgroundGradientTo"
+                    ariaLabel="Escolher cor de fundo do RSVP"
+                    defaultValue={colors.backgroundColor}
+                    defaultGradientValue={colors.backgroundGradientTo}
+                    onChange={updateColor("backgroundColor")}
+                    onGradientChange={updateColor("backgroundGradientTo")}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Opcional: sem cor definida, usamos um fundo que já combina com a animação escolhida.
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -378,7 +393,13 @@ function RsvpThemePreview({
         </div>
         <div
           className="relative flex min-h-[380px] flex-col items-center justify-center gap-6 overflow-hidden px-6 py-10 text-center"
-          style={enabled ? getSectionStyle(colors.backgroundColor, colors.textColor, colors.backgroundGradientTo) : undefined}
+          style={
+            !enabled
+              ? undefined
+              : backgroundType === "ANIMATED"
+                ? getAnimatedBackgroundStyle(animatedBackground, colors.backgroundColor, colors.textColor, colors.backgroundGradientTo)
+                : getSectionStyle(colors.backgroundColor, colors.textColor, colors.backgroundGradientTo)
+          }
         >
           {enabled && backgroundType === "IMAGE" && backgroundImageUrl && (
             <div

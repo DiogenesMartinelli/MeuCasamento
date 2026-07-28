@@ -78,17 +78,17 @@ const PETAL_COLORS = ["bg-rose-300", "bg-pink-200", "bg-rose-200"];
 const SNOW_SIZES = ["size-1.5", "size-1", "size-2"];
 const FIREFLY_COLOR = "bg-lime-200";
 
+/**
+ * Pure particle overlay - no backdrop of its own. The backdrop (the couple's chosen
+ * color, or a per-preset fallback gradient when they haven't set one) is applied by
+ * the caller, so this renders consistently over whatever background is actually
+ * showing instead of fighting it.
+ */
 export function AnimatedBackground({ preset }: { preset: RsvpAnimatedBackground }) {
   const count = preset === "STARS" ? 40 : 22;
 
   return (
-    <div
-      className={cn(
-        "pointer-events-none absolute inset-0 z-0 overflow-hidden",
-        preset === "STARS" && "bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900",
-      )}
-      aria-hidden
-    >
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
       {Array.from({ length: count }).map((_, i) => {
         const { left, delay } = scatter(i, count, 19, 13);
         const duration = 6 + (((i * 7 + 3) % 11) / 11) * 8;

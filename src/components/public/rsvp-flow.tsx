@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { GiftsList } from "@/components/public/gifts-list";
 import { getAccentButtonStyle, getCardStyle, getTextStyle, getMutedTextStyle, getSectionStyle } from "@/lib/accent-color";
 import type { SiteColors } from "@/lib/accent-color";
-import { getRsvpFontClass } from "@/lib/rsvp-theme";
+import { getAnimatedBackgroundStyle, getRsvpFontClass } from "@/lib/rsvp-theme";
 import { AnimatedBackground, ConfirmBurst, LightingOverlay, Sparkles, StringLights } from "@/components/public/rsvp-decorations";
 import { cn } from "@/lib/utils";
 import type { SerializedGift } from "@/lib/queries/gifts";
@@ -61,7 +61,21 @@ export function RsvpFlow({
   const backgroundType = useCustomBg ? rsvpTheme?.backgroundType ?? "INHERIT" : "INHERIT";
   const usesFlatBackground = backgroundType === "INHERIT" || backgroundType === "COLOR";
   const usesMedia = backgroundType === "IMAGE" || backgroundType === "VIDEO";
+  const isAnimated = backgroundType === "ANIMATED";
   const needsLightText = usesMedia && !colors?.textColor;
+
+  // For a ready-made animated background, the couple's own color/gradient becomes
+  // the backdrop under the particles when set - otherwise the preset falls back to
+  // its own backdrop, so petals/snow/fireflies always render against something with
+  // enough contrast instead of the page's plain default background.
+  const animatedBackdropStyle = isAnimated
+    ? getAnimatedBackgroundStyle(
+        rsvpTheme?.animatedBackground,
+        colors?.backgroundColor,
+        colors?.textColor,
+        colors?.backgroundGradientTo,
+      )
+    : undefined;
 
   const resolvedHeadingFont = getRsvpFontClass(useCustomBg ? rsvpTheme?.fontFamily : undefined, headingFont);
   const confirmedFontSource =
@@ -102,7 +116,13 @@ export function RsvpFlow({
   return (
     <div
       className={cn("relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6 py-16", usesFlatBackground && sectionBgClass)}
-      style={usesFlatBackground ? getSectionStyle(colors?.backgroundColor, colors?.textColor, colors?.backgroundGradientTo) : undefined}
+      style={
+        usesFlatBackground
+          ? getSectionStyle(colors?.backgroundColor, colors?.textColor, colors?.backgroundGradientTo)
+          : isAnimated
+            ? animatedBackdropStyle
+            : undefined
+      }
     >
       {useCustomBg && backgroundType === "IMAGE" && rsvpTheme?.backgroundImageUrl && (
         <div
@@ -121,7 +141,7 @@ export function RsvpFlow({
         />
       )}
       {useCustomBg && usesMedia && <div className="absolute inset-0 z-0 bg-black/40" />}
-      {useCustomBg && backgroundType === "ANIMATED" && rsvpTheme?.animatedBackground && (
+      {useCustomBg && isAnimated && rsvpTheme?.animatedBackground && (
         <AnimatedBackground preset={rsvpTheme.animatedBackground} />
       )}
       {useCustomBg && rsvpTheme?.lightingEffect && rsvpTheme.lightingEffect !== "NONE" && (

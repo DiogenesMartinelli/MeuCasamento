@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+import { getSectionStyle } from "@/lib/accent-color";
 import type { SiteColors } from "@/lib/accent-color";
 import type {
   RsvpAnimatedBackground,
@@ -22,6 +24,39 @@ export const RSVP_ANIMATED_BACKGROUND_OPTIONS: { value: RsvpAnimatedBackground; 
   { value: "STARS", label: "Céu estrelado" },
   { value: "FIREFLIES", label: "Vaga-lumes" },
 ];
+
+// Used only when the couple hasn't set their own background color/gradient for the
+// RSVP page - PETALS/SNOW/FIREFLIES render as sparse pale shapes on a plain page
+// background otherwise (looks broken), and STARS previously hardcoded this same
+// gradient directly onto the particle layer, which fought the couple's own colors
+// whenever they *had* set one. Now it's a fallback, not an override.
+export const ANIMATED_BACKGROUND_FALLBACK: Record<RsvpAnimatedBackground, { backgroundImage: string; textColor: string }> = {
+  PETALS: { backgroundImage: "linear-gradient(160deg, #ffe4e6, #fbcfe8 55%, #f0abfc)", textColor: "#831843" },
+  SNOW: { backgroundImage: "linear-gradient(180deg, #0f172a, #1e3a5f 60%, #334155)", textColor: "#ffffff" },
+  STARS: { backgroundImage: "linear-gradient(180deg, #020617, #1e1b4b 60%, #0f172a)", textColor: "#ffffff" },
+  FIREFLIES: { backgroundImage: "linear-gradient(180deg, #052e16, #14532d 55%, #052e16)", textColor: "#ffffff" },
+};
+
+/**
+ * Backdrop for an animated-background preset: the couple's own color/gradient when
+ * they've set one (so it behaves exactly like the plain COLOR background type),
+ * otherwise the preset's own fallback gradient + a text color that's actually
+ * legible against it - shared by the public RSVP page and the admin preview so they
+ * never drift apart.
+ */
+export function getAnimatedBackgroundStyle(
+  preset: RsvpAnimatedBackground | null | undefined,
+  backgroundColor?: string | null,
+  textColor?: string | null,
+  backgroundGradientTo?: string | null,
+): CSSProperties | undefined {
+  if (!preset) return undefined;
+  if (backgroundColor) {
+    return getSectionStyle(backgroundColor, textColor, backgroundGradientTo);
+  }
+  const fallback = ANIMATED_BACKGROUND_FALLBACK[preset];
+  return { backgroundImage: fallback.backgroundImage, color: textColor || fallback.textColor };
+}
 
 export const RSVP_LIGHTING_EFFECT_OPTIONS: { value: RsvpLightingEffect; label: string }[] = [
   { value: "NONE", label: "Nenhum" },
