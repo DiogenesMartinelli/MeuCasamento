@@ -232,7 +232,10 @@ function RsvpPreview({
       {step === "thanks" && (
         <div className="flex flex-col items-center gap-3">
           {status === "CONFIRMED" ? (
-            <p className="text-sm font-medium text-green-600 dark:text-green-400">
+            <p
+              className="text-sm font-medium text-black"
+              style={{ textShadow: "0 0 10px rgba(255,255,255,0.9), 0 0 20px rgba(255,220,150,0.7)" }}
+            >
               Presença confirmada! Vemos vocês lá 🎉
             </p>
           ) : (
