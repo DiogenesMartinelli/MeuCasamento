@@ -19,9 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type { Event, Guest, GuestStatus } from "@/generated/prisma/client";
-
-type FamilyOption = { token: string; label: string };
+import type { Event, Guest, GuestRelationship, GuestStatus } from "@/generated/prisma/client";
 
 const STATUS_LABEL: Record<GuestStatus, string> = {
   PENDING: "Pendente",
@@ -29,15 +27,27 @@ const STATUS_LABEL: Record<GuestStatus, string> = {
   DECLINED: "Recusado",
 };
 
+const RELATIONSHIP_LABEL: Record<GuestRelationship, string> = {
+  AMIGO: "Amigo(a)",
+  PADRINHO: "Padrinho/Madrinha",
+  PAI: "Pai",
+  MAE: "Mãe",
+  AVO: "Avô/Avó",
+  TIO: "Tio",
+  TIA: "Tia",
+  PRIMO: "Primo(a)",
+  OUTRO: "Outro",
+};
+
+const CAN_BE_WEDDING_SPONSOR: GuestRelationship[] = ["TIO", "TIA", "PRIMO"];
+
 export function GuestDialog({
   events,
-  families,
   guest,
   defaultFamilyToken,
   trigger,
 }: {
   events: Event[];
-  families: FamilyOption[];
   guest?: Guest;
   defaultFamilyToken?: string;
   trigger: React.ReactElement;
@@ -46,12 +56,23 @@ export function GuestDialog({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [eventId, setEventId] = useState(guest?.eventId ?? events[0]?.id ?? "");
-  const [familyToken, setFamilyToken] = useState(defaultFamilyToken ?? "new");
   const [status, setStatus] = useState<GuestStatus>(guest?.status ?? "PENDING");
+  const [relationship, setRelationship] = useState<GuestRelationship>(guest?.relationship ?? "AMIGO");
+  const [isPadrinho, setIsPadrinho] = useState(guest?.isPadrinho ?? false);
+  // Not shown in the UI anymore, but still submitted: "+ Membro" pre-sets this to an
+  // existing family's token, and the general "Novo convidado" button always starts a
+  // new one - there's no longer a visible way to redirect a guest into a different
+  // existing family from this dialog.
+  const familyToken = defaultFamilyToken ?? "new";
+
+  const selectedEvent = events.find((event) => event.id === eventId);
+  const showPadrinhoOption = CAN_BE_WEDDING_SPONSOR.includes(relationship) && !!selectedEvent?.isWedding;
 
   function handleSubmit(formData: FormData) {
     setError(null);
     formData.set("eventId", eventId);
+    formData.set("relationship", relationship);
+    formData.set("isPadrinho", String(showPadrinhoOption && isPadrinho));
     if (guest) formData.set("status", status);
     else formData.set("familyToken", familyToken);
 
@@ -100,7 +121,9 @@ export function GuestDialog({
             <Label>Evento</Label>
             <Select value={eventId} onValueChange={(value) => setEventId(value ?? "")}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o evento" />
+                <SelectValue placeholder="Selecione o evento">
+                  {(value: string | null) => events.find((event) => event.id === value)?.name ?? "Selecione o evento"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {events.map((event) => (
@@ -112,26 +135,42 @@ export function GuestDialog({
             </Select>
           </div>
 
-          {!guest && (
-            <div className="flex flex-col gap-1.5">
-              <Label>Família</Label>
-              <Select value={familyToken} onValueChange={(value) => setFamilyToken(value ?? "new")}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="new">Nova família</SelectItem>
-                  {families.map((family) => (
-                    <SelectItem key={family.token} value={family.token}>
-                      {family.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Convidados da mesma família compartilham um único link de confirmação.
-              </p>
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Parentesco</Label>
+            <Select value={relationship} onValueChange={(value) => setRelationship((value as GuestRelationship) ?? "OUTRO")}>
+              <SelectTrigger>
+                <SelectValue>
+                  {(value: string | null) => RELATIONSHIP_LABEL[value as GuestRelationship] ?? "Selecione"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(RELATIONSHIP_LABEL) as GuestRelationship[]).map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {RELATIONSHIP_LABEL[key]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Relação do convidado com o casal.</p>
+          </div>
+
+          {showPadrinhoOption && (
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={isPadrinho}
+                onChange={(e) => setIsPadrinho(e.target.checked)}
+                className="h-4 w-4 rounded border-input"
+              />
+              É padrinho/madrinha do casamento?
+            </label>
+          )}
+
+          {!guest && !defaultFamilyToken && (
+            <p className="text-xs text-muted-foreground">
+              Este convidado inicia uma nova família com link de confirmação próprio. Para
+              adicionar alguém a uma família já existente, use o botão &quot;+ Membro&quot; dela.
+            </p>
           )}
 
           {guest && (
@@ -139,7 +178,9 @@ export function GuestDialog({
               <Label>Status</Label>
               <Select value={status} onValueChange={(value) => setStatus(value as GuestStatus)}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>
+                    {(value: string | null) => STATUS_LABEL[value as GuestStatus] ?? "Selecione"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {(Object.keys(STATUS_LABEL) as GuestStatus[]).map((key) => (

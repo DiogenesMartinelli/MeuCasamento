@@ -14,8 +14,6 @@ export default async function GuestsPage() {
   ]);
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
 
-  const familyOptions = families.map((family) => ({ token: family.familyToken, label: family.label }));
-
   return (
     <div>
       <div className="flex items-center justify-between gap-4">
@@ -25,9 +23,7 @@ export default async function GuestsPage() {
             Organize convidados por família - cada família recebe um único link de confirmação.
           </p>
         </div>
-        {events.length > 0 && (
-          <GuestDialog events={events} families={familyOptions} trigger={<Button>Novo convidado</Button>} />
-        )}
+        {events.length > 0 && <GuestDialog events={events} trigger={<Button>Novo convidado</Button>} />}
       </div>
 
       {events.length === 0 ? (
@@ -42,7 +38,6 @@ export default async function GuestsPage() {
         <GuestFamiliesList
           families={families}
           events={events}
-          familyOptions={familyOptions}
           appUrl={appUrl}
           slug={account!.slug}
           coupleName={account?.siteSettings?.coupleName || "Nós"}

@@ -21,6 +21,18 @@ enum GuestStatus {
   DECLINED
 }
 
+enum GuestRelationship {
+  AMIGO
+  PADRINHO
+  PAI
+  MAE
+  AVO
+  TIO
+  TIA
+  PRIMO
+  OUTRO
+}
+
 enum GiftType {
   PHYSICAL_LINK
   CASH_QUOTA
@@ -192,9 +204,9 @@ model RsvpTheme {
   /// guest confirms or declines - lets that moment stand out from the rest of the flow.
   /// confirmedMessage replaces the default "Presença confirmada!" text when set;
   /// the decline message stays on SiteSettings.declineMessage (shared with the site).
-  confirmedMessage     String?
-  confirmedTextColor   String?
-  confirmedFontFamily  RsvpFontFamily?
+  confirmedMessage    String?
+  confirmedTextColor  String?
+  confirmedFontFamily RsvpFontFamily?
 
   lightingEffect   RsvpLightingEffect   @default(NONE)
   showSparkles     Boolean              @default(false)
@@ -214,6 +226,10 @@ model Event {
   name        String
   date        DateTime
   description String?
+  /// Marks the wedding ceremony itself (as opposed to a chá de panela, despedida de
+  /// solteiro, etc.) - only one event per account should have this set. Drives
+  /// whether the "padrinho/madrinha" option shows up when adding a guest.
+  isWedding   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
   guests Guest[]
@@ -224,20 +240,26 @@ model Event {
 }
 
 model Guest {
-  id          String      @id @default(uuid())
-  accountId   String
-  name        String
+  id           String            @id @default(uuid())
+  accountId    String
+  name         String
   /// WhatsApp-reachable phone number for the family, used to send the RSVP link/QR code.
   /// Only needs to be set on one member of a family for the "send" actions to work.
-  phone       String?
+  phone        String?
   /// Shared by every member of the same family unit so one link (/rsvp/[familyToken])
   /// confirms the whole family at once.
-  familyToken String      @default(uuid())
-  status      GuestStatus @default(PENDING)
-  eventId     String
-  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  respondedAt DateTime?
-  createdAt   DateTime    @default(now())
+  familyToken  String            @default(uuid())
+  status       GuestStatus       @default(PENDING)
+  /// Relationship to the couple, shown when managing guests - not related to
+  /// familyToken grouping.
+  relationship GuestRelationship @default(OUTRO)
+  /// Only meaningful when relationship is TIO/TIA/PRIMO and the guest's event
+  /// isWedding - whether they're a padrinho/madrinha of the ceremony.
+  isPadrinho   Boolean           @default(false)
+  eventId      String
+  event        Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  respondedAt  DateTime?
+  createdAt    DateTime          @default(now())
 
   @@index([accountId])
   @@index([familyToken])

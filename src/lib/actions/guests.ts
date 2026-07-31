@@ -15,11 +15,25 @@ const phoneSchema = z
   .optional()
   .transform((v) => (v ? v : undefined));
 
+const relationshipValues = [
+  "AMIGO",
+  "PADRINHO",
+  "PAI",
+  "MAE",
+  "AVO",
+  "TIO",
+  "TIA",
+  "PRIMO",
+  "OUTRO",
+] as const;
+
 const createSchema = z.object({
   name: z.string().trim().min(1, "Informe o nome do convidado").max(120),
   eventId: z.string().min(1, "Selecione um evento"),
   familyToken: z.string().min(1),
   phone: phoneSchema,
+  relationship: z.enum(relationshipValues),
+  isPadrinho: z.boolean(),
 });
 
 const updateSchema = z.object({
@@ -27,6 +41,8 @@ const updateSchema = z.object({
   eventId: z.string().min(1, "Selecione um evento"),
   status: z.enum(["PENDING", "CONFIRMED", "DECLINED"]),
   phone: phoneSchema,
+  relationship: z.enum(relationshipValues),
+  isPadrinho: z.boolean(),
 });
 
 export async function createGuest(formData: FormData): Promise<GuestFormState> {
@@ -37,6 +53,8 @@ export async function createGuest(formData: FormData): Promise<GuestFormState> {
     eventId: formData.get("eventId"),
     familyToken: formData.get("familyToken"),
     phone: formData.get("phone"),
+    relationship: formData.get("relationship"),
+    isPadrinho: formData.get("isPadrinho") === "true",
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
@@ -60,6 +78,8 @@ export async function createGuest(formData: FormData): Promise<GuestFormState> {
       eventId: parsed.data.eventId,
       familyToken,
       phone: parsed.data.phone,
+      relationship: parsed.data.relationship,
+      isPadrinho: parsed.data.isPadrinho,
     },
   });
 
@@ -78,6 +98,8 @@ export async function updateGuest(guestId: string, formData: FormData): Promise<
     eventId: formData.get("eventId"),
     status: formData.get("status"),
     phone: formData.get("phone"),
+    relationship: formData.get("relationship"),
+    isPadrinho: formData.get("isPadrinho") === "true",
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
@@ -92,6 +114,8 @@ export async function updateGuest(guestId: string, formData: FormData): Promise<
       status: parsed.data.status,
       phone: parsed.data.phone ?? null,
       respondedAt: parsed.data.status === "PENDING" ? null : new Date(),
+      relationship: parsed.data.relationship,
+      isPadrinho: parsed.data.isPadrinho,
     },
   });
 

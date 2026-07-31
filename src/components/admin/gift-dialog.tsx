@@ -105,7 +105,11 @@ export function GiftDialog({
             <Label>Tipo</Label>
             <Select value={type} onValueChange={(value) => setType(value as GiftType)}>
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue>
+                  {(value: string | null) =>
+                    value === "CASH_QUOTA" ? "Cota em dinheiro" : "Produto de loja (link)"
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="PHYSICAL_LINK">Produto de loja (link)</SelectItem>
@@ -191,7 +195,9 @@ export function GiftDialog({
             <Label>Evento</Label>
             <Select value={eventId} onValueChange={(value) => setEventId(value ?? "")}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o evento" />
+                <SelectValue placeholder="Selecione o evento">
+                  {(value: string | null) => events.find((event) => event.id === value)?.name ?? "Selecione o evento"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {events.map((event) => (

@@ -11,9 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { Event, Guest, GuestStatus } from "@/generated/prisma/client";
+import type { Event, Guest, GuestRelationship, GuestStatus } from "@/generated/prisma/client";
 
-type FamilyOption = { token: string; label: string };
 type Family = {
   familyToken: string;
   members: (Guest & { event: Event })[];
@@ -31,11 +30,21 @@ const STATUS_LABEL: Record<GuestStatus, string> = {
   DECLINED: "Recusado",
   PENDING: "Pendente",
 };
+const RELATIONSHIP_LABEL: Record<GuestRelationship, string> = {
+  AMIGO: "Amigo(a)",
+  PADRINHO: "Padrinho/Madrinha",
+  PAI: "Pai",
+  MAE: "Mãe",
+  AVO: "Avô/Avó",
+  TIO: "Tio",
+  TIA: "Tia",
+  PRIMO: "Primo(a)",
+  OUTRO: "Outro",
+};
 
 export function GuestFamiliesList({
   families,
   events,
-  familyOptions,
   appUrl,
   slug,
   coupleName,
@@ -43,7 +52,6 @@ export function GuestFamiliesList({
 }: {
   families: Family[];
   events: Event[];
-  familyOptions: FamilyOption[];
   appUrl: string;
   slug: string;
   coupleName: string;
@@ -140,7 +148,6 @@ export function GuestFamiliesList({
                   />
                   <GuestDialog
                     events={events}
-                    families={familyOptions}
                     defaultFamilyToken={family.familyToken}
                     trigger={
                       <Button variant="outline" size="sm">
@@ -157,6 +164,9 @@ export function GuestFamiliesList({
                       <p className="font-medium">{guest.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {guest.event.name}
+                        {" · "}
+                        {RELATIONSHIP_LABEL[guest.relationship]}
+                        {guest.isPadrinho ? " (Padrinho/Madrinha)" : ""}
                         {guest.phone ? ` · ${guest.phone}` : ""}
                       </p>
                     </div>
@@ -166,7 +176,6 @@ export function GuestFamiliesList({
                       </Badge>
                       <GuestDialog
                         events={events}
-                        families={familyOptions}
                         guest={guest}
                         trigger={
                           <Button variant="ghost" size="sm">

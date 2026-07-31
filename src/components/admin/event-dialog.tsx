@@ -77,6 +77,19 @@ export function EventDialog({ event, trigger }: { event?: Event; trigger: React.
               rows={2}
             />
           </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="isWedding"
+              defaultChecked={event?.isWedding ?? false}
+              className="h-4 w-4 rounded border-input"
+            />
+            Este é o evento do casamento
+          </label>
+          <p className="-mt-3 text-xs text-muted-foreground">
+            Usado para liberar a opção de padrinho/madrinha ao cadastrar convidados. Só um
+            evento pode ser marcado.
+          </p>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={isPending}>
             {isPending ? "Salvando..." : "Salvar"}
